@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.alivinco.fimp.FimpMessage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -60,12 +61,14 @@ public class Main {
 	private CoapEndpoint endPoint;
 	
 	private String ip;
+	private DeviceDb deviceDb;
 	
 	private HashMap<String, Integer> name2id = new HashMap<>();
 	private Vector<CoapObserveRelation> watching = new Vector<>();
 	
 	Main(String psk, String ip, String broker) {
 		this.ip = ip;
+		this.deviceDb = new DeviceDb();
 		DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder(new InetSocketAddress(0));
 		builder.setPskStore(new StaticPskStore("", psk.getBytes()));
 		dtlsConnector = new DTLSConnector(builder.build());
@@ -81,6 +84,9 @@ public class Main {
 				public void messageArrived(String topic, MqttMessage message) throws Exception {
 					// TODO Auto-generated method stub
 					System.out.println(topic + " " + message.toString());
+
+					JSONObject reqJson = new JSONObject(message.toString());
+					String msgType = reqJson.getString("type");
 					String parts[] = topic.split("/");
 					boolean bulb = parts[1].equals("bulb");
 					int id = name2id.get(parts[2]);
@@ -90,15 +96,16 @@ public class Main {
 					System.out.println(command);
 					try{
 						JSONObject json = new JSONObject();
+
 						if (bulb) { // single bulb
 							JSONObject settings = new JSONObject();
 							JSONArray array = new JSONArray();
 							array.put(settings);
 							json.put(LIGHT, array);
-							if (command.equals("dim")) {
+							if (msgType.equals("dim")) {
 								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, Integer.parseInt(message.toString()))));
 								settings.put(TRANSITION_TIME, 3);	// transition in seconds
-							} else if (command.equals("temperature")) {
+							} else if (msgType.equals("temperature")) {
 								// not sure what the COLOR_X and COLOR_Y values do, it works without them...
 								switch (message.toString()) {
 								case "cold":
@@ -113,8 +120,8 @@ public class Main {
 								default:
 									System.err.println("Invalid temperature supplied: " + message.toString());
 								}
-							} else if (command.equals("on")) {
-								if (message.toString().equals("0")) {
+							} else if (msgType.equals("cmd.binary.set")) {
+								if (reqJson.getBoolean("val")) {
 									settings.put(ONOFF, 0);
 								} else {
 									settings.put(ONOFF, 1);
@@ -149,10 +156,15 @@ public class Main {
 				@Override
 				public void connectionLost(Throwable cause) {
 					// TODO Auto-generated method stub
+					System.out.println("Connection lost:");
+					cause.printStackTrace();
 				}
 			});
-			mqttClient.subscribe("TRÅDFRI/bulb/+/control/+");
-			mqttClient.subscribe("TRÅDFRI/room/+/control/+");
+//			mqttClient.subscribe("TRÅDFRI/bulb/+/control/+");
+//			mqttClient.subscribe("TRÅDFRI/room/+/control/+");
+			//pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:out_bin_switch/ad:15_0
+			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/+");
+//			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:15_0");
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -179,6 +191,7 @@ public class Main {
 			CoapClient client = new CoapClient(uri);
 			client.setEndpoint(endPoint);
 			CoapResponse response = client.get();
+			System.out.println("Devices: "+response.getResponseText());
 			if (response == null) {
 				System.out.println("Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
 				System.exit(-1);
@@ -186,6 +199,13 @@ public class Main {
 			JSONArray array = new JSONArray(response.getResponseText());
 			for (int i=0; i<array.length(); i++) {
 				String devUri = "coaps://" + ip + "//" + DEVICES + "/" + array.getInt(i);
+
+//				CoapClient client2 = new CoapClient(uri);
+//				client2.setEndpoint(endPoint);
+//				CoapResponse response2 = client.get();
+//				System.out.println("Response from "+devUri);
+//				System.out.println("Msg: "+response2.getResponseText());
+
 				this.watch(devUri);
 			}
 			client.shutdown();
@@ -263,28 +283,28 @@ public class Main {
 						if (json.has(LIGHT) && (json.has(TYPE) && json.getInt(TYPE) == 2)) { // single bulb
 
 							JSONObject light = json.getJSONArray(LIGHT).getJSONObject(0);
+							JSONObject device = json.getJSONObject(DEVICE);
+							deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),device.getString(DEVICE_MANUFACTURER),"light_bulb","device",device.getString(DEVICE_VERSION));
 
 							if (!light.has(ONOFF)) {
 								System.err.println("Bulb '" + json.getString(NAME) + "' has no On/Off value (probably no power on lightbulb socket)");
 								return; // skip this lamp for now
 							}
-							int state = light.getInt(ONOFF);
-							String topic = "TRÅDFRI/bulb/" + json.getString(NAME) + "/state/on";
-							String topic2 = "TRÅDFRI/bulb/" + json.getString(NAME) + "/state/dim";
-							String topic3 = "TRÅDFRI/bulb/" + json.getString(NAME) + "/state/temperature";
-
-							MqttMessage message = new MqttMessage();
-							message.setPayload(Integer.toString(state).getBytes());
-//							message.setRetained(true);
+							boolean stateBool = (light.getInt(ONOFF) != 0);
+							String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/" + json.getInt(INSTANCE_ID);
+							String lvlTopicTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/" + json.getInt(INSTANCE_ID);
+//
+							FimpMessage binSwitchFimp = new FimpMessage("out_bin_switch","evt.binary.report",stateBool,null,null,null);
+							MqttMessage binSwitchMsgMqtt = new MqttMessage();
+							binSwitchMsgMqtt.setPayload(binSwitchFimp.msgToString().getBytes());
 
 							name2id.put(json.getString(NAME), json.getInt(INSTANCE_ID));
-
-							MqttMessage message2 = null;
+							MqttMessage lvlSwitchMsgMqtt = null;
 							if (light.has(DIMMER)) {
-								message2 = new MqttMessage();
-								int dim = light.getInt(DIMMER);
-								message2.setPayload(Integer.toString(dim).getBytes());
-//								message2.setRetained(true);
+								lvlSwitchMsgMqtt = new MqttMessage();
+								int level = light.getInt(DIMMER);
+								FimpMessage lvlSwitchFimp = new FimpMessage("out_lvl_switch","evt.lvl.report",level,null,null,null);
+								lvlSwitchMsgMqtt.setPayload(lvlSwitchFimp.msgToString().getBytes());
 							} else {
 								System.err.println("Bulb '" + json.getString(NAME) + "' has no dimming value (maybe just no power on lightbulb socket)");
 							}
@@ -294,18 +314,14 @@ public class Main {
 								message3 = new MqttMessage();
 								String temperature = light.getString(COLOR);
 								message3.setPayload(temperature.getBytes());
-//								message3.setRetained(true);
 							} else { // just fyi for the user. maybe add further handling later
 								System.out.println("Bulb '" + json.getString(NAME) + "' doesn't support color temperature");
 							}
 
 							try {
-								mqttClient.publish(topic, message);
-								if (message2 != null) {
-									mqttClient.publish(topic2, message2);
-								}
-								if (message3 != null) {
-									mqttClient.publish(topic3, message3);
+								mqttClient.publish( binSwitchTopic , binSwitchMsgMqtt);
+								if (lvlSwitchMsgMqtt != null) {
+									mqttClient.publish(lvlTopicTopic, lvlSwitchMsgMqtt);
 								}
 							} catch (MqttException e) {
 								// TODO Auto-generated catch block
