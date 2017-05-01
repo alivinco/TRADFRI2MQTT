@@ -54,7 +54,9 @@ public class FimpMessage {
     public FimpMessage(String service , String mtype , boolean value , Map<String,String> props, List<String> tags, String reqUid){
         this(service , mtype , "bool" , value , props, tags, reqUid);
     }
-
+    public FimpMessage(String service , String mtype , Object value , Map<String,String> props, List<String> tags, String reqUid){
+        this(service , mtype , "object" , value , props, tags, reqUid);
+    }
     public void setIntValue(int value){
         this.value = value;
     }
@@ -105,9 +107,18 @@ public class FimpMessage {
         fimp.valueType = reqJson.getString("val_t");
         fimp.value = reqJson.get("val");
         if (reqJson.has("props"))
-            fimp.props = toMap(reqJson.getJSONObject("props"));
+            try{
+                fimp.props = toMap(reqJson.getJSONObject("props"));
+            }catch (Exception e){
+
+            }
+
         if (reqJson.has("tags"))
-            fimp.tags = toList(reqJson.getJSONArray("tags"));
+            try{
+                fimp.tags = toList(reqJson.getJSONArray("tags"));
+            }catch (Exception e){
+
+            }
         if (reqJson.has("uid"))
             fimp.corid = reqJson.getString("uid");
         return fimp;

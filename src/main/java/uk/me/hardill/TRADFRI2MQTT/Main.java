@@ -62,6 +62,7 @@ public class Main {
 	
 	private String ip;
 	private DeviceDb deviceDb;
+	private AdapterApi adApi;
 	
 	private HashMap<String, Integer> name2id = new HashMap<>();
 	private Vector<CoapObserveRelation> watching = new Vector<>();
@@ -69,6 +70,7 @@ public class Main {
 	Main(String psk, String ip, String broker) {
 		this.ip = ip;
 		this.deviceDb = new DeviceDb();
+
 		DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder(new InetSocketAddress(0));
 		builder.setPskStore(new StaticPskStore("", psk.getBytes()));
 		dtlsConnector = new DTLSConnector(builder.build());
@@ -78,13 +80,18 @@ public class Main {
 		try {
 			mqttClient = new MqttClient(broker, MqttClient.generateClientId(), persistence);
 			mqttClient.connect();
+			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient);
 			mqttClient.setCallback(new MqttCallback() {
 				
 				@Override
 				public void messageArrived(String topic, MqttMessage message) throws Exception {
 					// TODO Auto-generated method stub
 					System.out.println(topic + " " + message.toString());
+					FimpMessage fimp = FimpMessage.stringToMsg(message.toString());
 
+					if (adApi.onMessage(topic,fimp)){
+						return;
+					}
 					JSONObject reqJson = new JSONObject(message.toString());
 					String msgType = reqJson.getString("type");
 					String parts[] = topic.split("/");
@@ -163,6 +170,7 @@ public class Main {
 //			mqttClient.subscribe("TRÅDFRI/bulb/+/control/+");
 //			mqttClient.subscribe("TRÅDFRI/room/+/control/+");
 			//pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:out_bin_switch/ad:15_0
+			mqttClient.subscribe("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/+");
 //			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:15_0");
 		} catch (MqttException e) {

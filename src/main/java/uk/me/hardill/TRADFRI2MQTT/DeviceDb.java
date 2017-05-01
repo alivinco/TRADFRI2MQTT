@@ -8,6 +8,9 @@ import java.util.Hashtable;
 public class DeviceDb {
     Hashtable<Integer,Device> deviceDb;
 
+    DeviceDb(){
+        this.deviceDb = new Hashtable<Integer,Device>();
+    }
     // returns true if device was added
     public boolean upsertDevice(int instanceId,String productName,String manufacturer ,String serviceName,String type,String swVersion){
         Device dev = deviceDb.get(instanceId);
@@ -21,6 +24,7 @@ public class DeviceDb {
             newDev.swVersion = swVersion;
             newDev.hwVersion = "1";
             deviceDb.put(instanceId,newDev);
+            System.out.println("Device DB size = "+deviceDb.size());
             return true;
         }
         return false;
