@@ -4,14 +4,15 @@ package uk.me.hardill.TRADFRI2MQTT;
  * Created by alivinco on 28/04/2017.
  */
 public class Device {
-    int id;
-    String productName;
-    String serviceType; // dimmer,light_bulb,remote
-    String type;  // device , group
-    String manufacturer;
-    String swVersion;
-    String hwVersion;
-    int dimLevel;
-    boolean lightState;
+    public int id;
+    public String productName;
+    public String alias;
+    public String serviceType; // dimmer,light_bulb,remote
+    public String type;  // device , group
+    public String manufacturer;
+    public String swVersion;
+    public String hwVersion;
+    public int dimLevel;
+    public boolean lightState;
 
 }

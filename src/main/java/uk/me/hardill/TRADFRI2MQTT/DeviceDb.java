@@ -12,12 +12,14 @@ public class DeviceDb {
         this.deviceDb = new Hashtable<Integer,Device>();
     }
     // returns true if device was added
-    public boolean upsertDevice(int instanceId,String productName,String manufacturer ,String serviceName,String type,String swVersion){
+    public boolean upsertDevice(int instanceId,String alias,String productName,String manufacturer ,String serviceName,String type,String swVersion){
         Device dev = deviceDb.get(instanceId);
         if (dev == null) {
             Device newDev = new Device();
             newDev.id = instanceId;
+            newDev.alias = alias;
             newDev.productName = productName;
+            newDev.alias = productName;
             newDev.manufacturer = manufacturer;
             newDev.serviceType = serviceName;
             newDev.type = type;

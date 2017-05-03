@@ -63,7 +63,8 @@ public class Main {
 	private String ip;
 	private DeviceDb deviceDb;
 	private AdapterApi adApi;
-	
+	private FimpMiddleware fimpMiddleware;
+
 	private HashMap<String, Integer> name2id = new HashMap<>();
 	private Vector<CoapObserveRelation> watching = new Vector<>();
 	
@@ -81,6 +82,7 @@ public class Main {
 			mqttClient = new MqttClient(broker, MqttClient.generateClientId(), persistence);
 			mqttClient.connect();
 			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient);
+			this.fimpMiddleware = new FimpMiddleware(mqttClient);
 			mqttClient.setCallback(new MqttCallback() {
 				
 				@Override
@@ -292,27 +294,21 @@ public class Main {
 
 							JSONObject light = json.getJSONArray(LIGHT).getJSONObject(0);
 							JSONObject device = json.getJSONObject(DEVICE);
-							deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),device.getString(DEVICE_MANUFACTURER),"light_bulb","device",device.getString(DEVICE_VERSION));
+							deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),device.getString(PRODUCT_NAME),device.getString(DEVICE_MANUFACTURER),"light_bulb","device",device.getString(DEVICE_VERSION));
 
-							if (!light.has(ONOFF)) {
+							if (light.has(ONOFF)) {
+								boolean stateBool = (light.getInt(ONOFF) != 0);
+								fimpMiddleware.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
+							}else {
 								System.err.println("Bulb '" + json.getString(NAME) + "' has no On/Off value (probably no power on lightbulb socket)");
 								return; // skip this lamp for now
 							}
-							boolean stateBool = (light.getInt(ONOFF) != 0);
-							String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/" + json.getInt(INSTANCE_ID);
-							String lvlTopicTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/" + json.getInt(INSTANCE_ID);
-//
-							FimpMessage binSwitchFimp = new FimpMessage("out_bin_switch","evt.binary.report",stateBool,null,null,null);
-							MqttMessage binSwitchMsgMqtt = new MqttMessage();
-							binSwitchMsgMqtt.setPayload(binSwitchFimp.msgToString().getBytes());
 
 							name2id.put(json.getString(NAME), json.getInt(INSTANCE_ID));
-							MqttMessage lvlSwitchMsgMqtt = null;
+
 							if (light.has(DIMMER)) {
-								lvlSwitchMsgMqtt = new MqttMessage();
 								int level = light.getInt(DIMMER);
-								FimpMessage lvlSwitchFimp = new FimpMessage("out_lvl_switch","evt.lvl.report",level,null,null,null);
-								lvlSwitchMsgMqtt.setPayload(lvlSwitchFimp.msgToString().getBytes());
+								fimpMiddleware.reportDimLvlChange(json.getInt(INSTANCE_ID),level);
 							} else {
 								System.err.println("Bulb '" + json.getString(NAME) + "' has no dimming value (maybe just no power on lightbulb socket)");
 							}
@@ -326,38 +322,27 @@ public class Main {
 								System.out.println("Bulb '" + json.getString(NAME) + "' doesn't support color temperature");
 							}
 
-							try {
-								mqttClient.publish( binSwitchTopic , binSwitchMsgMqtt);
-								if (lvlSwitchMsgMqtt != null) {
-									mqttClient.publish(lvlTopicTopic, lvlSwitchMsgMqtt);
-								}
-							} catch (MqttException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
 						} else if (json.has(HS_ACCESSORY_LINK)) { // groups have this entry
 							//room?
 							System.out.println("room");
+							JSONObject group = json.getJSONObject(HS_ACCESSORY_LINK);
+							deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),"","","light_bulb","group","");
+
+							if (json.has(ONOFF)) {
+								boolean stateBool = (json.getInt(ONOFF) != 0);
+								fimpMiddleware.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
+							}else {
+								System.out.println("No switch in the group ");
+							}
+							if (json.has(DIMMER)) {
+								int level = json.getInt(DIMMER);
+								fimpMiddleware.reportDimLvlChange(json.getInt(INSTANCE_ID),level);
+							}else {
+								System.out.println("No dim level in the group ");
+							}
+
 							name2id.put(json.getString(NAME), json.getInt(INSTANCE_ID));
 
-							String topic = "TRÅDFRI/room/" + json.getString(NAME) + "/state/on";
-							String topic2 = "TRÅDFRI/room/" + json.getString(NAME) + "/state/dim";
-
-							MqttMessage message = new MqttMessage();
-							int state = json.getInt(ONOFF);
-							message.setPayload(Integer.toString(state).getBytes());
-
-							MqttMessage message2 = new MqttMessage();
-							int dim = json.getInt(DIMMER);
-							message2.setPayload(Integer.toString(dim).getBytes());
-
-							try {
-								mqttClient.publish(topic, message);
-								mqttClient.publish(topic2, message2);
-							} catch (MqttException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
 						} else {
 							System.out.println("not bulb");
 						}

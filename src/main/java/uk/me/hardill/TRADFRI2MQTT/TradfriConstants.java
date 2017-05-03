@@ -19,6 +19,7 @@ public class TradfriConstants {
 	public static final String GROUPS = "15004";
 	public static final String DEVICE = "3";
 	public static final String DEVICE_MANUFACTURER = "0";
+	public static final String PRODUCT_NAME = "1";
 	public static final String DEVICE_VERSION = "3";
 	// Values in JSON data
 	public static final String NAME = "9001"; // used in both devices and groups
