@@ -11,8 +11,8 @@ import org.json.JSONException;
  */
 public class FimpMiddleware {
     MqttClient mqttClient;
-    String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/";
-    String lvlTopicTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/";
+    String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:";
+    String lvlTopicTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:";
     //
     public FimpMiddleware(MqttClient mqttClient){
         this.mqttClient = mqttClient;

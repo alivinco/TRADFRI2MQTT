@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.alivinco.fimp.FimpAddress;
 import com.alivinco.fimp.FimpMessage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -90,19 +91,22 @@ public class Main {
 					// TODO Auto-generated method stub
 					System.out.println(topic + " " + message.toString());
 					FimpMessage fimp = FimpMessage.stringToMsg(message.toString());
+					FimpAddress fimpAddr = FimpAddress.parseStringAddress(topic);
 
 					if (adApi.onMessage(topic,fimp)){
 						return;
 					}
 					JSONObject reqJson = new JSONObject(message.toString());
-					String msgType = reqJson.getString("type");
-					String parts[] = topic.split("/");
-					boolean bulb = parts[1].equals("bulb");
-					int id = name2id.get(parts[2]);
-					
+//					String msgType = reqJson.getString("type");
+//					String parts[] = topic.split("/");
+					boolean bulb = true;
+					int id = Integer.parseInt(fimpAddr.serviceAddress);
+					Device dev = deviceDb.getDeviceById(id);
+					if (dev.type.equals("group"))
+						bulb = false;
 					System.out.println(id);
-					String command = parts[4];
-					System.out.println(command);
+//					String command = parts[4];
+//					System.out.println(command);
 					try{
 						JSONObject json = new JSONObject();
 
@@ -111,42 +115,51 @@ public class Main {
 							JSONArray array = new JSONArray();
 							array.put(settings);
 							json.put(LIGHT, array);
-							if (msgType.equals("dim")) {
-								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, Integer.parseInt(message.toString()))));
-								settings.put(TRANSITION_TIME, 3);	// transition in seconds
-							} else if (msgType.equals("temperature")) {
-								// not sure what the COLOR_X and COLOR_Y values do, it works without them...
-								switch (message.toString()) {
-								case "cold":
-									settings.put(COLOR, COLOR_COLD);
-									break;
-								case "normal":
-									settings.put(COLOR, COLOR_NORMAL);
-									break;
-								case "warm":
-									settings.put(COLOR, COLOR_WARM);
-									break;
-								default:
-									System.err.println("Invalid temperature supplied: " + message.toString());
-								}
-							} else if (msgType.equals("cmd.binary.set")) {
-								if (reqJson.getBoolean("val")) {
-									settings.put(ONOFF, 0);
-								} else {
+//							if (msgType.equals("dim")) {
+//								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, Integer.parseInt(message.toString()))));
+//								settings.put(TRANSITION_TIME, 3);	// transition in seconds
+//							} else if (msgType.equals("temperature")) {
+//								// not sure what the COLOR_X and COLOR_Y values do, it works without them...
+//								switch (message.toString()) {
+//								case "cold":
+//									settings.put(COLOR, COLOR_COLD);
+//									break;
+//								case "normal":
+//									settings.put(COLOR, COLOR_NORMAL);
+//									break;
+//								case "warm":
+//									settings.put(COLOR, COLOR_WARM);
+//									break;
+//								default:
+//									System.err.println("Invalid temperature supplied: " + message.toString());
+//								}
+//							} else
+								if (fimp.mtype.equals("cmd.binary.set")) {
+								if (fimp.getBoolValue()) {
 									settings.put(ONOFF, 1);
+								} else {
+									settings.put(ONOFF, 0);
 								}
 							}
 							String payload = json.toString();
+							System.out.println("Sending COAP message :"+payload);
 							Main.this.set("coaps://" + Main.this.ip + "//" + DEVICES + "/" + id, payload);
 						} else { // whole group
-							if (command.equals("dim")) {
-								json.put(DIMMER, Integer.parseInt(message.toString()));
-								json.put(TRANSITION_TIME, 3);
-							} else {
-								if (message.toString().equals("0")) {
-									json.put(ONOFF, 0);
-								} else {
+//							if (command.equals("dim")) {
+//								json.put(DIMMER, Integer.parseInt(message.toString()));
+//								json.put(TRANSITION_TIME, 3);
+//							} else {
+//								if (message.toString().equals("0")) {
+//									json.put(ONOFF, 0);
+//								} else {
+//									json.put(ONOFF, 1);
+//								}
+//							}
+							if (fimp.mtype.equals("cmd.binary.set")) {
+								if (fimp.getBoolValue()) {
 									json.put(ONOFF, 1);
+								} else {
+									json.put(ONOFF, 0);
 								}
 							}
 							String payload = json.toString();

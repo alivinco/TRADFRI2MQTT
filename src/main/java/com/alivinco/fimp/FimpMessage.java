@@ -65,6 +65,11 @@ public class FimpMessage {
         return (int)this.value;
     }
 
+    public boolean getBoolValue() {
+        return (boolean)this.value;
+    }
+
+
     public double getDoubleValue() {
         return (double)this.value;
     }

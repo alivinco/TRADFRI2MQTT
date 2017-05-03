@@ -19,7 +19,6 @@ public class DeviceDb {
             newDev.id = instanceId;
             newDev.alias = alias;
             newDev.productName = productName;
-            newDev.alias = productName;
             newDev.manufacturer = manufacturer;
             newDev.serviceType = serviceName;
             newDev.type = type;
