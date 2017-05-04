@@ -13,6 +13,7 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import com.alivinco.fimp.FimpAddress;
 import com.alivinco.fimp.FimpMessage;
@@ -52,9 +53,9 @@ public class Main {
 	
 	static {
 		CaliforniumLogger.disableLogging();
-		ScandiumLogger.disable();
-//		ScandiumLogger.initialize();
-//		ScandiumLogger.setLevel(Level.FINE);
+//		ScandiumLogger.disable();
+		ScandiumLogger.initialize();
+		ScandiumLogger.setLevel(Level.FINE);
 	}
 	
 	private DTLSConnector dtlsConnector;
@@ -134,12 +135,16 @@ public class Main {
 //									System.err.println("Invalid temperature supplied: " + message.toString());
 //								}
 //							} else
-								if (fimp.mtype.equals("cmd.binary.set")) {
+							if (fimp.mtype.equals("cmd.binary.set")) {
 								if (fimp.getBoolValue()) {
 									settings.put(ONOFF, 1);
 								} else {
 									settings.put(ONOFF, 0);
 								}
+							}else if (fimp.mtype.equals("cmd.lvl.set")) {
+								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, fimp.getIntValue())));
+								int duration = Integer.parseInt(fimp.props.get("duration"));
+								settings.put(TRANSITION_TIME, duration);	// transition in seconds
 							}
 							String payload = json.toString();
 							System.out.println("Sending COAP message :"+payload);
@@ -187,6 +192,7 @@ public class Main {
 			//pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:out_bin_switch/ad:15_0
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/+");
+			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/+");
 //			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:15_0");
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
@@ -211,14 +217,17 @@ public class Main {
 		//bulbs
 		try {
 			URI uri = new URI("coaps://" + ip + "//" + DEVICES);
+			System.out.println("Connecting to ip="+ip);
 			CoapClient client = new CoapClient(uri);
 			client.setEndpoint(endPoint);
+
 			CoapResponse response = client.get();
-			System.out.println("Devices: "+response.getResponseText());
 			if (response == null) {
-				System.out.println("Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
+				System.out.println("1 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
 				System.exit(-1);
 			}
+			System.out.println("Devices: "+response.getResponseText());
+
 			JSONArray array = new JSONArray(response.getResponseText());
 			for (int i=0; i<array.length(); i++) {
 				String devUri = "coaps://" + ip + "//" + DEVICES + "/" + array.getInt(i);
@@ -246,7 +255,7 @@ public class Main {
 			client.setEndpoint(endPoint);
 			CoapResponse response = client.get();
 			if (response == null) {
-				System.out.println("Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
+				System.out.println("2 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
 				System.exit(-1);
 			}
 			JSONArray array = new JSONArray(response.getResponseText());

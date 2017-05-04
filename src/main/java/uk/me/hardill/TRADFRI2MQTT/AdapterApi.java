@@ -1,13 +1,15 @@
 package uk.me.hardill.TRADFRI2MQTT;
 
 import com.alivinco.fimp.FimpMessage;
-import com.oracle.javafx.jmx.json.JSONFactory;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.Map;
+
+import static uk.me.hardill.TRADFRI2MQTT.TradfriConstants.*;
+
 /**
  * Created by alivinco on 28/04/2017.
  */
@@ -30,8 +32,10 @@ public class AdapterApi {
                 JSONArray jsonArray = new JSONArray();
 
                 Map <Integer,Device> deviceDb = this.deviceDb.getAllDevices();
-                deviceDb.forEach((id,device)->{
-                   JSONObject dev = new JSONObject();
+                for (Map.Entry<Integer,Device>  entry : deviceDb.entrySet()) {
+                    int id = entry.getKey();
+                    Device device = entry.getValue();
+                    JSONObject dev = new JSONObject();
                     try {
                         dev.put("id",id);
                         dev.put("alias",device.alias);
@@ -41,8 +45,11 @@ public class AdapterApi {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-                });
+                }
+//                deviceDb.forEach((id,device)->{
+//
+//
+//                });
 
                 FimpMessage fimpResp = new FimpMessage("ikea-ad","evt.network.all_nodes_report",jsonArray,null,null,fimp.uid);
 
@@ -125,7 +132,10 @@ public class AdapterApi {
         switchService.put("group",new JSONArray().put("ch_1"));
         switchService.put("name","out_lvl_switch");
         switchService.put("location","");
-        switchService.put("props",new JSONObject());
+        JSONObject props = new JSONObject();
+        props.put("min_lvl",DIMMER_MIN);
+        props.put("max_lvl",DIMMER_MAX);
+        switchService.put("props",props);
         JSONArray interfaces = new JSONArray();
         interfaces.put(getInterfaceJobj("out","evt.lvl.report","int"));
         interfaces.put(getInterfaceJobj("in","cmd.lvl.set","int"));
