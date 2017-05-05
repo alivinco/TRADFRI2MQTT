@@ -12,7 +12,7 @@ import org.json.JSONException;
 public class FimpMiddleware {
     MqttClient mqttClient;
     String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:";
-    String lvlTopicTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:";
+    String lvlSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:";
     //
     public FimpMiddleware(MqttClient mqttClient){
         this.mqttClient = mqttClient;
@@ -40,7 +40,7 @@ public class FimpMiddleware {
         try {
             lvlSwitchMsgMqtt.setPayload(lvlSwitchFimp.msgToString().getBytes());
             try {
-                this.mqttClient.publish(binSwitchTopic+Integer.toString(id) , lvlSwitchMsgMqtt);
+                this.mqttClient.publish(lvlSwitchTopic+Integer.toString(id) , lvlSwitchMsgMqtt);
             } catch (MqttException e) {
                 e.printStackTrace();
             }

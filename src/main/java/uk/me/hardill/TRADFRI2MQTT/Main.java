@@ -98,16 +98,12 @@ public class Main {
 						return;
 					}
 					JSONObject reqJson = new JSONObject(message.toString());
-//					String msgType = reqJson.getString("type");
-//					String parts[] = topic.split("/");
 					boolean bulb = true;
 					int id = Integer.parseInt(fimpAddr.serviceAddress);
 					Device dev = deviceDb.getDeviceById(id);
 					if (dev.type.equals("group"))
 						bulb = false;
 					System.out.println(id);
-//					String command = parts[4];
-//					System.out.println(command);
 					try{
 						JSONObject json = new JSONObject();
 
@@ -143,7 +139,9 @@ public class Main {
 								}
 							}else if (fimp.mtype.equals("cmd.lvl.set")) {
 								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, fimp.getIntValue())));
-								int duration = Integer.parseInt(fimp.props.get("duration"));
+								int duration = 3;
+								if (fimp.props.get("duration")!=null)
+									 duration = Integer.parseInt(fimp.props.get("duration"));
 								settings.put(TRANSITION_TIME, duration);	// transition in seconds
 							}
 							String payload = json.toString();
@@ -187,13 +185,9 @@ public class Main {
 					cause.printStackTrace();
 				}
 			});
-//			mqttClient.subscribe("TRÅDFRI/bulb/+/control/+");
-//			mqttClient.subscribe("TRÅDFRI/room/+/control/+");
-			//pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:out_bin_switch/ad:15_0
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/+");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/+");
-//			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:15_0");
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -231,13 +225,6 @@ public class Main {
 			JSONArray array = new JSONArray(response.getResponseText());
 			for (int i=0; i<array.length(); i++) {
 				String devUri = "coaps://" + ip + "//" + DEVICES + "/" + array.getInt(i);
-
-//				CoapClient client2 = new CoapClient(uri);
-//				client2.setEndpoint(endPoint);
-//				CoapResponse response2 = client.get();
-//				System.out.println("Response from "+devUri);
-//				System.out.println("Msg: "+response2.getResponseText());
-
 				this.watch(devUri);
 			}
 			client.shutdown();

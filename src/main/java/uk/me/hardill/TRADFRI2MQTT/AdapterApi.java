@@ -46,11 +46,6 @@ public class AdapterApi {
                         e.printStackTrace();
                     }
                 }
-//                deviceDb.forEach((id,device)->{
-//
-//
-//                });
-
                 FimpMessage fimpResp = new FimpMessage("ikea-ad","evt.network.all_nodes_report",jsonArray,null,null,fimp.uid);
 
                 try {
@@ -97,10 +92,27 @@ public class AdapterApi {
                     e.printStackTrace();
                 }
                 return true;
+            }else if (fimp.mtype.equals("cmd.thing.exclusion")){
+                Map <Integer,Device> deviceDb = this.deviceDb.getAllDevices();
+                try{
+                    for (Map.Entry<Integer,Device>  entry : deviceDb.entrySet()) {
+                        JSONObject value = new JSONObject();
+                        value.put("address",entry.getKey().toString());
+                        FimpMessage fimpResp = new FimpMessage("ikea-ad","evt.thing.exclusion_report",value,null,null,fimp.uid);
+                        System.out.println("Sending response :"+fimpResp.msgToString());
+                        mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
+                }
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return true;
             }
         }
         return false;
     }
+
 
     private JSONObject getInterfaceJobj(String interfaceType,String msgType ,String valueType) throws JSONException {
         JSONObject intf = new JSONObject();
@@ -114,7 +126,7 @@ public class AdapterApi {
     private JSONObject getBinSwitchServiceDescriptor(String id) throws JSONException {
         JSONObject switchService = new JSONObject();
         switchService.put("address","/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:"+id);
-        switchService.put("group",new JSONArray().put("ch_1"));
+        switchService.put("groups",new JSONArray().put("ch_1"));
         switchService.put("name","out_bin_switch");
         switchService.put("location","");
         switchService.put("props",new JSONObject());
@@ -129,7 +141,7 @@ public class AdapterApi {
     private JSONObject getLvlSwitchSeviceDescriptor(String id) throws JSONException {
         JSONObject switchService = new JSONObject();
         switchService.put("address","/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:"+id);
-        switchService.put("group",new JSONArray().put("ch_1"));
+        switchService.put("groups",new JSONArray().put("ch_1"));
         switchService.put("name","out_lvl_switch");
         switchService.put("location","");
         JSONObject props = new JSONObject();
