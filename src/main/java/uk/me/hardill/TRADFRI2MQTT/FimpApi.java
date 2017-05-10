@@ -9,16 +9,24 @@ import org.json.JSONException;
 /**
  * Created by alivinco on 02/05/2017.
  */
-public class FimpMiddleware {
+public class FimpApi {
     MqttClient mqttClient;
+    DeviceDb deviceDb;
     String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:";
     String lvlSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:";
     //
-    public FimpMiddleware(MqttClient mqttClient){
+    public FimpApi(MqttClient mqttClient, DeviceDb deviceDb){
+        this.deviceDb = deviceDb;
         this.mqttClient = mqttClient;
     }
 
     public void reportSwitchStateChange(int id , boolean state ){
+
+        if (!this.deviceDb.updateLightState(id,state)){
+            System.out.println("Switch value is not changed , skipp.");
+            return ;
+        }
+
         FimpMessage binSwitchFimp = new FimpMessage("out_bin_switch","evt.binary.report",state,null,null,null);
         MqttMessage binSwitchMsgMqtt = new MqttMessage();
         try {
@@ -35,6 +43,11 @@ public class FimpMiddleware {
     }
 
     public void reportDimLvlChange(int id , int level ){
+        if (!this.deviceDb.updateDimLevel(id,level)){
+            System.out.println("Dim value is not changed , skipp.");
+            return ;
+        }
+        level = (int)Math.round(level/2.55);
         FimpMessage lvlSwitchFimp = new FimpMessage("out_lvl_switch","evt.lvl.report",level,null,null,null);
         MqttMessage lvlSwitchMsgMqtt = new MqttMessage();
         try {

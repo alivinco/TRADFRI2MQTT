@@ -65,7 +65,8 @@ public class Main {
 	private String ip;
 	private DeviceDb deviceDb;
 	private AdapterApi adApi;
-	private FimpMiddleware fimpMiddleware;
+	private FimpApi fimpApi;
+	private TradfriApi tradfriApi;
 
 	private HashMap<String, Integer> name2id = new HashMap<>();
 	private Vector<CoapObserveRelation> watching = new Vector<>();
@@ -84,7 +85,8 @@ public class Main {
 			mqttClient = new MqttClient(broker, MqttClient.generateClientId(), persistence);
 			mqttClient.connect();
 			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient);
-			this.fimpMiddleware = new FimpMiddleware(mqttClient);
+			this.fimpApi = new FimpApi(mqttClient,this.deviceDb);
+			this.tradfriApi = new TradfriApi(this.endPoint,this.ip);
 			mqttClient.setCallback(new MqttCallback() {
 				
 				@Override
@@ -98,76 +100,29 @@ public class Main {
 						return;
 					}
 					JSONObject reqJson = new JSONObject(message.toString());
-					boolean bulb = true;
+					boolean isDevice = true;
 					int id = Integer.parseInt(fimpAddr.serviceAddress);
 					Device dev = deviceDb.getDeviceById(id);
 					if (dev.type.equals("group"))
-						bulb = false;
+						isDevice = false;
 					System.out.println(id);
 					try{
-						JSONObject json = new JSONObject();
-
-						if (bulb) { // single bulb
-							JSONObject settings = new JSONObject();
-							JSONArray array = new JSONArray();
-							array.put(settings);
-							json.put(LIGHT, array);
-//							if (msgType.equals("dim")) {
-//								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, Integer.parseInt(message.toString()))));
-//								settings.put(TRANSITION_TIME, 3);	// transition in seconds
-//							} else if (msgType.equals("temperature")) {
-//								// not sure what the COLOR_X and COLOR_Y values do, it works without them...
-//								switch (message.toString()) {
-//								case "cold":
-//									settings.put(COLOR, COLOR_COLD);
-//									break;
-//								case "normal":
-//									settings.put(COLOR, COLOR_NORMAL);
-//									break;
-//								case "warm":
-//									settings.put(COLOR, COLOR_WARM);
-//									break;
-//								default:
-//									System.err.println("Invalid temperature supplied: " + message.toString());
-//								}
-//							} else
-							if (fimp.mtype.equals("cmd.binary.set")) {
-								if (fimp.getBoolValue()) {
-									settings.put(ONOFF, 1);
-								} else {
-									settings.put(ONOFF, 0);
-								}
-							}else if (fimp.mtype.equals("cmd.lvl.set")) {
-								settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, fimp.getIntValue())));
-								int duration = 3;
-								if (fimp.props.get("duration")!=null)
-									 duration = Integer.parseInt(fimp.props.get("duration"));
-								settings.put(TRANSITION_TIME, duration);	// transition in seconds
-							}
-							String payload = json.toString();
-							System.out.println("Sending COAP message :"+payload);
-							Main.this.set("coaps://" + Main.this.ip + "//" + DEVICES + "/" + id, payload);
-						} else { // whole group
-//							if (command.equals("dim")) {
-//								json.put(DIMMER, Integer.parseInt(message.toString()));
-//								json.put(TRANSITION_TIME, 3);
-//							} else {
-//								if (message.toString().equals("0")) {
-//									json.put(ONOFF, 0);
-//								} else {
-//									json.put(ONOFF, 1);
-//								}
-//							}
-							if (fimp.mtype.equals("cmd.binary.set")) {
-								if (fimp.getBoolValue()) {
-									json.put(ONOFF, 1);
-								} else {
-									json.put(ONOFF, 0);
-								}
-							}
-							String payload = json.toString();
-							Main.this.set("coaps://" + Main.this.ip + "//" + GROUPS + "/" + id, payload);
+						if (fimp.mtype.equals("cmd.binary.set")) {
+							if (isDevice)
+								Main.this.tradfriApi.lightSwitchCtrl(id,fimp.getBoolValue());
+							else
+								Main.this.tradfriApi.lightSwitchGroupCtrl(id,fimp.getBoolValue());
+						}else if (fimp.mtype.equals("cmd.lvl.set")) {
+							int lvlValue = fimp.getIntValue();
+							int duration = 3;
+							if (fimp.props.get("duration")!=null)
+								 duration = Integer.parseInt(fimp.props.get("duration"));
+							if (isDevice)
+								Main.this.tradfriApi.lightDimmerCtrl(id,lvlValue,duration);
+							else
+								Main.this.tradfriApi.lightDimmerGroupCtrl(id,lvlValue,duration);
 						}
+
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -260,26 +215,26 @@ public class Main {
 		}
 	}
 	
-	private void set(String uriString, String payload) {
-		System.out.println("payload\n" + payload);
-		try {
-			URI uri = new URI(uriString);
-			CoapClient client = new CoapClient(uri);
-			client.setEndpoint(endPoint);
-			CoapResponse response = client.put(payload, MediaTypeRegistry.TEXT_PLAIN);
-			if (response.isSuccess()) {
-				System.out.println("Yay");
-			} else {
-				System.out.println("Boo");
-			}
-			
-			client.shutdown();
-			
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	private void set(String uriString, String payload) {
+//		System.out.println("payload\n" + payload);
+//		try {
+//			URI uri = new URI(uriString);
+//			CoapClient client = new CoapClient(uri);
+//			client.setEndpoint(endPoint);
+//			CoapResponse response = client.put(payload, MediaTypeRegistry.TEXT_PLAIN);
+//			if (response.isSuccess()) {
+//				System.out.println("Yay");
+//			} else {
+//				System.out.println("Boo");
+//			}
+//
+//			client.shutdown();
+//
+//		} catch (URISyntaxException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	private void watch(String uriString) {
 		
@@ -307,7 +262,7 @@ public class Main {
 
 							if (light.has(ONOFF)) {
 								boolean stateBool = (light.getInt(ONOFF) != 0);
-								fimpMiddleware.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
+								fimpApi.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
 							}else {
 								System.err.println("Bulb '" + json.getString(NAME) + "' has no On/Off value (probably no power on lightbulb socket)");
 								return; // skip this lamp for now
@@ -317,7 +272,7 @@ public class Main {
 
 							if (light.has(DIMMER)) {
 								int level = light.getInt(DIMMER);
-								fimpMiddleware.reportDimLvlChange(json.getInt(INSTANCE_ID),level);
+								fimpApi.reportDimLvlChange(json.getInt(INSTANCE_ID),level);
 							} else {
 								System.err.println("Bulb '" + json.getString(NAME) + "' has no dimming value (maybe just no power on lightbulb socket)");
 							}
@@ -339,13 +294,13 @@ public class Main {
 
 							if (json.has(ONOFF)) {
 								boolean stateBool = (json.getInt(ONOFF) != 0);
-								fimpMiddleware.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
+								fimpApi.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
 							}else {
 								System.out.println("No switch in the group ");
 							}
 							if (json.has(DIMMER)) {
 								int level = json.getInt(DIMMER);
-								fimpMiddleware.reportDimLvlChange(json.getInt(INSTANCE_ID),level);
+								fimpApi.reportDimLvlChange(json.getInt(INSTANCE_ID),level);
 							}else {
 								System.out.println("No dim level in the group ");
 							}
