@@ -1,4 +1,4 @@
-package uk.me.hardill.TRADFRI2MQTT;
+package com.alivinco.tradfri;
 
 /**
  * Created by alivinco on 28/04/2017.

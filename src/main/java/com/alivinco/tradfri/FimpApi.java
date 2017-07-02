@@ -1,6 +1,7 @@
-package uk.me.hardill.TRADFRI2MQTT;
+package com.alivinco.tradfri;
 
 import com.alivinco.fimp.FimpMessage;
+import com.alivinco.tradfri.DeviceDb;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;

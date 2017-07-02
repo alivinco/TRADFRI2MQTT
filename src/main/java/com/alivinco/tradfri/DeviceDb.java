@@ -1,4 +1,4 @@
-package uk.me.hardill.TRADFRI2MQTT;
+package com.alivinco.tradfri;
 
 import java.util.Hashtable;
 
@@ -8,7 +8,7 @@ import java.util.Hashtable;
 public class DeviceDb {
     Hashtable<Integer,Device> deviceDb;
 
-    DeviceDb(){
+    public DeviceDb(){
         this.deviceDb = new Hashtable<Integer,Device>();
     }
     // returns true if device was added

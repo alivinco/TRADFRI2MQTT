@@ -1,4 +1,4 @@
-package uk.me.hardill.TRADFRI2MQTT;
+package com.alivinco.tradfri;
 
 import com.alivinco.fimp.FimpMessage;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -6,20 +6,23 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.Map;
 
-import static uk.me.hardill.TRADFRI2MQTT.TradfriConstants.*;
+import static com.alivinco.tradfri.TradfriConstants.*;
 
 /**
  * Created by alivinco on 28/04/2017.
  */
 public class AdapterApi {
-    DeviceDb deviceDb;
-    MqttClient mqttClient;
+    private DeviceDb deviceDb;
+    private MqttClient mqttClient;
+    private TradfriApi tradfriApi;
 
-    public AdapterApi(DeviceDb deviceDb,MqttClient mqttClient){
+    public AdapterApi(DeviceDb deviceDb,MqttClient mqttClient , TradfriApi tradfriApi){
         this.deviceDb = deviceDb;
         this.mqttClient = mqttClient;
+        this.tradfriApi = tradfriApi;
 
     }
     public boolean onMessage(String topic , FimpMessage fimp){
@@ -37,7 +40,7 @@ public class AdapterApi {
                     Device device = entry.getValue();
                     JSONObject dev = new JSONObject();
                     try {
-                        dev.put("id",id);
+                        dev.put("address",id);
                         dev.put("alias",device.alias);
                         dev.put("type",device.type);
                         dev.put("service_type",device.serviceType);
@@ -108,6 +111,12 @@ public class AdapterApi {
                     e.printStackTrace();
                 }
                 return true;
+            }else if (fimp.mtype.equals("cmd.system.connect")) {
+
+            }else if (fimp.mtype.equals("cmd.system.disconnect")) {
+
+            }else if (fimp.mtype.equals("cmd.system.get_status")) {
+
             }
         }
         return false;

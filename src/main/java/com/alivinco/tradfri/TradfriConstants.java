@@ -1,4 +1,4 @@
-package uk.me.hardill.TRADFRI2MQTT;
+package com.alivinco.tradfri;
 
 /**
  * Partly inspired by "com/ikea/tradfri/lighting/ipso/IPSOObjects.java"
