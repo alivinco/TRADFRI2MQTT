@@ -41,15 +41,15 @@ public class Main {
 	private MsgRouter msgRouter;
 
 	
-	Main(String broker) {
+	Main(String broker,String configFilePath) {
 		this.deviceDb = new DeviceDb();
 		MemoryPersistence persistence = new MemoryPersistence();
 		try {
 			mqttClient = new MqttClient(broker, MqttClient.generateClientId(), persistence);
 			mqttClient.connect();
-			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient,this.tradfriApi );
 			this.fimpApi = new FimpApi(mqttClient,this.deviceDb);
-			this.tradfriApi = new TradfriApi();
+			this.tradfriApi = new TradfriApi(configFilePath);
+			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient,this.tradfriApi );
 			this.msgRouter = new MsgRouter(this.adApi,this.fimpApi,this.tradfriApi,this.deviceDb);
 			mqttClient.setCallback(new MqttCallback() {
 				
@@ -70,7 +70,7 @@ public class Main {
 					cause.printStackTrace();
 				}
 			});
-			tradfriApi.setCallback(response -> Main.this.msgRouter.onCoapMessage(response));
+			tradfriApi.setEventsHandler(this.msgRouter);
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/+");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/+");
@@ -80,47 +80,34 @@ public class Main {
 
 	}
 
-	public void connect(String ip,String psk) {
-		tradfriApi.connect(ip,psk);
-	}
-
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//-psk LUMozPGBWkaFSCgU
 		Options options = new Options();
-		options.addOption("psk", true, "The Secret on the base of the gateway");
-		options.addOption("ip", true, "The IP address of the gateway");
+		options.addOption("conf", true, "Configuration storage file path ");
 		options.addOption("broker", true, "MQTT URL");
 
-//		GwDiscovery gwDiscovery = new GwDiscovery();
-//		try {
-//			gwDiscovery.discover();
-//		}catch (Exception ex){
-//			System.out.println(ex);
-//		}
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
 			cmd = parser.parse( options, args);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		String psk = cmd.getOptionValue("psk");
-		String ip = cmd.getOptionValue("ip");
+		String confFile = cmd.getOptionValue("conf");
 		String broker = cmd.getOptionValue("broker");
 		
-		if (psk == null || ip == null || broker == null) {
+		if (confFile == null || broker == null) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp( "TRADFRI2MQTT", options );
 			System.exit(1);
 		}
 
-		Main m = new Main(broker);
-		m.connect(ip,psk);
+		Main m = new Main(broker,confFile);
 
 	}
 

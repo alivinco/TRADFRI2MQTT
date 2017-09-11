@@ -12,12 +12,13 @@ import java.net.UnknownHostException;
  * Created by alivinco on 28/06/2017.
  */
 
-interface GwUpdate
+
+//interface GwUpdate
 
 public class GwDiscovery {
-    private String gwIp;
-
-    private static class SampleListener implements ServiceListener {
+    protected String gwId;
+    protected String gwIpAddress;
+    private class SampleListener implements ServiceListener {
         @Override
         public void serviceAdded(ServiceEvent event) {
 //            System.out.println("Service added: " + event.getInfo());
@@ -26,6 +27,9 @@ public class GwDiscovery {
             System.out.println("Service name: " +info.getName());
             for (InetAddress addr:info.getInet4Addresses()) {
                 System.out.println("Service address: " +addr.getHostAddress());
+                gwId = info.getName();
+                gwIpAddress = addr.getHostAddress();
+                GwDiscovery.this.onGwDiscovered(info.getName(),addr.getHostAddress());
 
             }
         }
@@ -41,8 +45,13 @@ public class GwDiscovery {
         }
     }
 
-    GwDiscovery() throws InterruptedException {
+    void onGwDiscovered(String gwId , String gwIpAddress)  {
+        System.out.println("<GwDiscovery> New gateway is discovered. GW id = " +gwId+" IP = "+gwIpAddress);
+    }
+
+    GwDiscovery() {
         try {
+            System.out.println("Starting gateway discovery");
             // Create a JmDNS instance
             JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
             // Add a service listener

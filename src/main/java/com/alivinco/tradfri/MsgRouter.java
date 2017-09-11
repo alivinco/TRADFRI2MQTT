@@ -13,7 +13,7 @@ import static com.alivinco.tradfri.TradfriConstants.INSTANCE_ID;
 /**
  * Created by alivinco on 02/07/2017.
  */
-public class MsgRouter {
+public class MsgRouter implements TradfriApiEvents {
     private DeviceDb deviceDb;
     private AdapterApi adApi;
     private FimpApi fimpApi;
@@ -62,6 +62,22 @@ public class MsgRouter {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onGwDiscovered(String gwId, String gwIpAddress) {
+        this.adApi.sendConnectParmsReport(gwId,gwIpAddress);
+
+    }
+
+    @Override
+    public void onGwConnected(String gwId) {
+
+    }
+
+    @Override
+    public void onGwLostConnection(String gwId) {
+
     }
 
     public void onCoapMessage(CoapResponse response) {
