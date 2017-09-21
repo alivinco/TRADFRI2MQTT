@@ -28,21 +28,22 @@ public class MsgRouter implements TradfriApiEvents {
 
     public void onMqttMessage(String topic, MqttMessage message) throws Exception {
         // TODO Auto-generated method stub
-        System.out.println(topic + " " + message.toString());
-        FimpMessage fimp = FimpMessage.stringToMsg(message.toString());
-        FimpAddress fimpAddr = FimpAddress.parseStringAddress(topic);
-
-        if (adApi.onMessage(topic,fimp)){
-            return;
-        }
-        JSONObject reqJson = new JSONObject(message.toString());
-        boolean isDevice = true;
-        int id = Integer.parseInt(fimpAddr.serviceAddress);
-        Device dev = deviceDb.getDeviceById(id);
-        if (dev.type.equals("group"))
-            isDevice = false;
-        System.out.println(id);
         try{
+            System.out.println(topic + " " + message.toString());
+            FimpMessage fimp = FimpMessage.stringToMsg(message.toString());
+            FimpAddress fimpAddr = FimpAddress.parseStringAddress(topic);
+
+            if (adApi.onMessage(topic,fimp)){
+                return;
+            }
+            JSONObject reqJson = new JSONObject(message.toString());
+            boolean isDevice = true;
+            int id = Integer.parseInt(fimpAddr.serviceAddress);
+            Device dev = deviceDb.getDeviceById(id);
+            if (dev.type.equals("group"))
+                isDevice = false;
+            System.out.println(id);
+
             if (fimp.mtype.equals("cmd.binary.set")) {
                 if (isDevice)
                     this.tradfriApi.lightSwitchCtrl(id,fimp.getBoolValue());
@@ -83,6 +84,7 @@ public class MsgRouter implements TradfriApiEvents {
     public void onCoapMessage(CoapResponse response) {
         System.out.println(response.getResponseText());
         System.out.println(response.getOptions().toString());
+        boolean isNewDevice;
         try {
             JSONObject json = new JSONObject(response.getResponseText());
             //TODO change this test to something based on 5750 values
@@ -92,8 +94,11 @@ public class MsgRouter implements TradfriApiEvents {
 
                 JSONObject light = json.getJSONArray(LIGHT).getJSONObject(0);
                 JSONObject device = json.getJSONObject(DEVICE);
-                deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),device.getString(PRODUCT_NAME),device.getString(DEVICE_MANUFACTURER),"light_bulb","device",device.getString(DEVICE_VERSION));
 
+                isNewDevice = deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),device.getString(PRODUCT_NAME),device.getString(DEVICE_MANUFACTURER),"light_bulb","device",device.getString(DEVICE_VERSION));
+                if (isNewDevice) {
+                    this.adApi.sendInclusionReport(json.getInt(INSTANCE_ID),"");
+                }
                 if (light.has(ONOFF)) {
                     boolean stateBool = (light.getInt(ONOFF) != 0);
                     fimpApi.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);
@@ -122,8 +127,10 @@ public class MsgRouter implements TradfriApiEvents {
                 //room?
                 System.out.println("room");
                 JSONObject group = json.getJSONObject(HS_ACCESSORY_LINK);
-                deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),"","","light_bulb","group","");
-
+                isNewDevice = deviceDb.upsertDevice(json.getInt(INSTANCE_ID),json.getString(NAME),"","","light_bulb","group","");
+                if (isNewDevice) {
+                    this.adApi.sendInclusionReport(json.getInt(INSTANCE_ID),"");
+                }
                 if (json.has(ONOFF)) {
                     boolean stateBool = (json.getInt(ONOFF) != 0);
                     fimpApi.reportSwitchStateChange(json.getInt(INSTANCE_ID),stateBool);

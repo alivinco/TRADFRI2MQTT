@@ -71,7 +71,9 @@ public class TradfriApi extends GwDiscovery {
             connInfo.gwId = jconfig.getString("gw_id");
             connInfo.gwIpAddress = jconfig.getString("gw_ip_address");
             connInfo.gwPskKey = jconfig.getString("gw_psk");
-            if (connInfo.gwId != "" && connInfo.gwIpAddress != "" && connInfo.gwPskKey != "") {
+            if ( !connInfo.gwId.isEmpty() && !connInfo.gwIpAddress.isEmpty() && !connInfo.gwPskKey.isEmpty()) {
+                System.out.println("Connection is configured");
+                System.out.println(connInfo.gwId+";"+connInfo.gwIpAddress+";"+connInfo.gwPskKey);
                 connInfo.isConfigured = true;
             }
 
@@ -103,9 +105,10 @@ public class TradfriApi extends GwDiscovery {
     }
 
     public void getConnectionInfoAsync() {
-        if (eventsHandler != null) {
-            eventsHandler.onGwDiscovered(connInfo.gwId,connInfo.gwIpAddress);
-        }
+        requestServiceInfoAsync();
+//        if (eventsHandler != null) {
+//            eventsHandler.onGwDiscovered(connInfo.gwId,connInfo.gwIpAddress);
+//        }
     }
 
     @Override
@@ -249,10 +252,23 @@ public class TradfriApi extends GwDiscovery {
                 }
             }
         };
-        executor.scheduleAtFixedRate(command, 120, 120, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(command, 10, 120, TimeUnit.SECONDS);
 
         discoverDevicesAndGroups();
         return  "CONFIGURED";
+    }
+
+    public String disconnect() {
+        // shutting down observable registration loop
+        executor.shutdown();
+        executor = null;
+        connInfo.gwId = "";
+        connInfo.gwIpAddress = "";
+        connInfo.gwPskKey = "";
+        connInfo.isConfigured = false;
+        connInfo.isConnected = false;
+        saveConectionInfoToFile();
+        return "OK";
     }
 
     public void setEventsHandler(TradfriApiEvents  handler) {
@@ -282,6 +298,7 @@ public class TradfriApi extends GwDiscovery {
             JSONArray array = new JSONArray(response.getResponseText());
             for (int i=0; i<array.length(); i++) {
                 String devUri = "coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + array.getInt(i);
+                System.out.println("Discovering device with url: "+devUri);
                 this.subscribeForCoapMessages(devUri);
             }
             client.shutdown();
@@ -331,7 +348,8 @@ public class TradfriApi extends GwDiscovery {
                 @Override
                 public void onLoad(CoapResponse response) {
                    //Main.this.msgRouter.onCoapMessage(response);
-                    TradfriApi.this.eventsHandler.onCoapMessage(response);
+                    if(TradfriApi.this.connInfo.isConnected)
+                        TradfriApi.this.eventsHandler.onCoapMessage(response);
                 }
 
                 @Override

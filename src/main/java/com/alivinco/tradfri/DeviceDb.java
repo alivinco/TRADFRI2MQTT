@@ -30,6 +30,9 @@ public class DeviceDb {
         }
         return false;
     };
+    public void clear() {
+        this.deviceDb.clear();
+    }
     // returns true if value was updated
     public boolean updateDimLevel(int instanceId,int level){
         Device dev = deviceDb.get(instanceId);

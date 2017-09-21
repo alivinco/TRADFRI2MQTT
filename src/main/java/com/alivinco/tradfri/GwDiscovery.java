@@ -18,6 +18,7 @@ import java.net.UnknownHostException;
 public class GwDiscovery {
     protected String gwId;
     protected String gwIpAddress;
+    JmDNS jmdns;
     private class SampleListener implements ServiceListener {
         @Override
         public void serviceAdded(ServiceEvent event) {
@@ -49,13 +50,28 @@ public class GwDiscovery {
         System.out.println("<GwDiscovery> New gateway is discovered. GW id = " +gwId+" IP = "+gwIpAddress);
     }
 
+    void requestServiceInfoAsync() {
+        ServiceInfo []infos = jmdns.list("_coap._udp.local.");
+        for(ServiceInfo info:infos) {
+            for (InetAddress addr:info.getInet4Addresses()) {
+                System.out.println("Service address: " +addr.getHostAddress());
+                gwId = info.getName();
+                gwIpAddress = addr.getHostAddress();
+                GwDiscovery.this.onGwDiscovered(info.getName(),addr.getHostAddress());
+
+            }
+        }
+
+    }
+
     GwDiscovery() {
         try {
             System.out.println("Starting gateway discovery");
             // Create a JmDNS instance
-            JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+            jmdns = JmDNS.create(InetAddress.getLocalHost());
             // Add a service listener
             jmdns.addServiceListener("_coap._udp.local.", new SampleListener());
+
         } catch (UnknownHostException e) {
             System.out.println(e.getMessage());
         } catch (IOException e) {

@@ -42,7 +42,7 @@ public class AdapterApi {
                     Device device = entry.getValue();
                     JSONObject dev = new JSONObject();
                     try {
-                        dev.put("address",id);
+                        dev.put("address",Integer.toString(id));
                         dev.put("alias",device.alias);
                         dev.put("type",device.type);
                         dev.put("service_type",device.serviceType);
@@ -65,49 +65,20 @@ public class AdapterApi {
 
             }else if (fimp.mtype.equals("cmd.thing.get_inclusion_report")){
                 String id = fimp.getStringValue();
-                Device dev = deviceDb.getDeviceById(Integer.parseInt(id));
-                JSONObject jdev = new JSONObject();
-                try {
-
-                    JSONArray services = new JSONArray();
-                    services.put(getBinSwitchServiceDescriptor(id));
-                    services.put(getLvlSwitchSeviceDescriptor(id));
-                    jdev.put("address",id);
-                    jdev.put("comm_tech","ikea");
-                    jdev.put("device_id","");
-                    jdev.put("alias",dev.alias);
-                    jdev.put("hw_ver",dev.hwVersion);
-                    jdev.put("sw_ver",dev.swVersion);
-                    jdev.put("manufacturer_id",dev.manufacturer);
-                    jdev.put("power_source","ac");
-                    jdev.put("product_hash",dev.productName);
-                    jdev.put("product_id",dev.productName);
-                    jdev.put("product_name",dev.productName);
-                    jdev.put("services",services);
-                    FimpMessage fimpResp = new FimpMessage("ikea","evt.thing.inclusion_report",jdev,null,null,fimp.uid);
-                    try {
-                        System.out.println("Sending response :"+fimpResp.msgToString());
-                        mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                sendInclusionReport(Integer.parseInt(id),fimp.uid);
                 return true;
             }else if (fimp.mtype.equals("cmd.system.disconnect")){
                 Map <Integer,Device> deviceDb = this.deviceDb.getAllDevices();
                 try{
+                    this.tradfriApi.disconnect();
                     for (Map.Entry<Integer,Device>  entry : deviceDb.entrySet()) {
                         JSONObject value = new JSONObject();
                         value.put("address",entry.getKey().toString());
                         FimpMessage fimpResp = new FimpMessage("ikea","evt.thing.exclusion_report",value,null,null,fimp.uid);
                         System.out.println("Sending response :"+fimpResp.msgToString());
                         mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
-                }
+                    }
+                    this.deviceDb.clear();
                 } catch (MqttException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
@@ -132,6 +103,41 @@ public class AdapterApi {
             }
         }
         return false;
+    }
+
+    public void sendInclusionReport(int deviceId,String requestUid) {
+        Device dev = deviceDb.getDeviceById(deviceId);
+        JSONObject jdev = new JSONObject();
+        try {
+
+            JSONArray services = new JSONArray();
+            services.put(getBinSwitchServiceDescriptor(Integer.toString(deviceId)));
+            services.put(getLvlSwitchSeviceDescriptor(Integer.toString(deviceId)));
+            jdev.put("address",Integer.toString(deviceId));
+            jdev.put("comm_tech","ikea");
+            jdev.put("device_id","");
+            jdev.put("alias",dev.alias);
+            jdev.put("hw_ver",dev.hwVersion);
+            jdev.put("sw_ver",dev.swVersion);
+            jdev.put("manufacturer_id",dev.manufacturer);
+            jdev.put("power_source","ac");
+            jdev.put("product_hash",dev.productName);
+            jdev.put("product_id",dev.productName);
+            jdev.put("product_name",dev.productName);
+            jdev.put("services",services);
+            FimpMessage fimpResp = new FimpMessage("ikea","evt.thing.inclusion_report",jdev,null,null,requestUid);
+            try {
+                System.out.println("Sending response :"+fimpResp.msgToString());
+                mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendConnectParmsReport(String gwId, String gwIpAddress) {
