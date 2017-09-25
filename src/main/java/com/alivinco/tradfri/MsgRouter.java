@@ -6,6 +6,9 @@ import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.logging.Logger;
+
 import static com.alivinco.tradfri.TradfriConstants.*;
 import static com.alivinco.tradfri.TradfriConstants.DIMMER;
 import static com.alivinco.tradfri.TradfriConstants.INSTANCE_ID;
@@ -14,12 +17,14 @@ import static com.alivinco.tradfri.TradfriConstants.INSTANCE_ID;
  * Created by alivinco on 02/07/2017.
  */
 public class MsgRouter implements TradfriApiEvents {
+    Logger logger = Logger.getLogger("ikea");
     private DeviceDb deviceDb;
     private AdapterApi adApi;
     private FimpApi fimpApi;
     private TradfriApi tradfriApi;
 
     public MsgRouter(AdapterApi adApi,FimpApi fimpApi,TradfriApi tradfriApi,DeviceDb deviceDb) {
+
         this.adApi = adApi;
         this.fimpApi = fimpApi;
         this.tradfriApi = tradfriApi;
@@ -58,6 +63,16 @@ public class MsgRouter implements TradfriApiEvents {
                     this.tradfriApi.lightDimmerCtrl(id,lvlValue,duration);
                 else
                     this.tradfriApi.lightDimmerGroupCtrl(id,lvlValue,duration);
+            }else if (fimp.mtype.equals("cmd.color.set")) {
+                JSONObject value = fimp.getJsonObjectValue();
+                int red =  value.getInt("red");
+                int green = value.getInt("green");
+                int blue = value.getInt("blue");
+                logger.info("cmd.color.set red="+Integer.toString(red)+" green="+Integer.toString(green)+" blue="+Integer.toString(blue));
+//                if (isDevice)
+                this.tradfriApi.lightColorControl(id,red,green,blue);
+//                else
+//                    this.tradfriApi.lightDimmerGroupCtrl(id,lvlValue,duration);
             }
 
         } catch (Exception e) {

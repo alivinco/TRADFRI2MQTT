@@ -1,0 +1,14 @@
+[Unit]
+Description=Ikea adapter
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/java -Xms5m -jar ikea-ad.jar -conf connInfo.json  -broker tcp://localhost
+User=fimp
+WorkingDirectory=/opt/ikea-ad
+Restart=on-failure
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

@@ -74,7 +74,7 @@ public class FimpMessage {
         return (double)this.value;
     }
 
-    public void seStringValue(String value){
+    public void setStringValue(String value){
         this.value = value;
     }
 

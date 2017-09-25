@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static com.alivinco.tradfri.TradfriConstants.*;
 
@@ -20,7 +21,7 @@ public class AdapterApi {
     private MqttClient mqttClient;
     private TradfriApi tradfriApi;
     private String requestId;
-
+    Logger logger = Logger.getLogger("ikea");
     public AdapterApi(DeviceDb deviceDb,MqttClient mqttClient , TradfriApi tradfriApi){
         this.deviceDb = deviceDb;
         this.mqttClient = mqttClient;
@@ -28,12 +29,11 @@ public class AdapterApi {
 
     }
     public boolean onMessage(String topic , FimpMessage fimp){
-        System.out.println("New message of type ="+fimp.mtype+ " service = "+fimp.service);
+        logger.fine("New message of type ="+fimp.mtype+ " service = "+fimp.service);
         if (fimp.service.equals("ikea")){
-            System.out.println("Service is ok");
+            logger.fine("Service is ok");
             if (fimp.mtype.equals("cmd.network.get_all_nodes")) {
-
-                System.out.println("cmd.network.get_all_nodes");
+                logger.info("cmd.network.get_all_nodes");
                 JSONArray jsonArray = new JSONArray();
 
                 Map <Integer,Device> deviceDb = this.deviceDb.getAllDevices();
@@ -48,18 +48,21 @@ public class AdapterApi {
                         dev.put("service_type",device.serviceType);
                         jsonArray.put(dev);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                        logger.warning(e.getMessage());
                     }
                 }
                 FimpMessage fimpResp = new FimpMessage("ikea","evt.network.all_nodes_report",jsonArray,null,null,fimp.uid);
 
                 try {
-                    System.out.println("Sending response :"+fimpResp.msgToString());
+                    logger.fine("Sending response :"+fimpResp.msgToString());
                     mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
                 } catch (MqttException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
+                    logger.warning(e.getMessage());
                 } catch (JSONException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
+                    logger.warning(e.getMessage());
                 }
                 return true;
 
@@ -75,14 +78,16 @@ public class AdapterApi {
                         JSONObject value = new JSONObject();
                         value.put("address",entry.getKey().toString());
                         FimpMessage fimpResp = new FimpMessage("ikea","evt.thing.exclusion_report",value,null,null,fimp.uid);
-                        System.out.println("Sending response :"+fimpResp.msgToString());
+                        logger.fine("Sending response :"+fimpResp.msgToString());
                         mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
                     }
                     this.deviceDb.clear();
                 } catch (MqttException e) {
-                    e.printStackTrace();
+                    logger.warning(e.getMessage());
+//                    e.printStackTrace();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
+                    logger.warning(e.getMessage());
                 }
                 return true;
             }else if (fimp.mtype.equals("cmd.system.connect")) {
@@ -105,7 +110,7 @@ public class AdapterApi {
         return false;
     }
 
-    public void sendInclusionReport(int deviceId,String requestUid) {
+    public synchronized void sendInclusionReport(int deviceId,String requestUid) {
         Device dev = deviceDb.getDeviceById(deviceId);
         JSONObject jdev = new JSONObject();
         try {
@@ -113,6 +118,7 @@ public class AdapterApi {
             JSONArray services = new JSONArray();
             services.put(getBinSwitchServiceDescriptor(Integer.toString(deviceId)));
             services.put(getLvlSwitchSeviceDescriptor(Integer.toString(deviceId)));
+            services.put(getColorCtrlServiceDescriptor(Integer.toString(deviceId)));
             jdev.put("address",Integer.toString(deviceId));
             jdev.put("comm_tech","ikea");
             jdev.put("device_id","");
@@ -127,12 +133,14 @@ public class AdapterApi {
             jdev.put("services",services);
             FimpMessage fimpResp = new FimpMessage("ikea","evt.thing.inclusion_report",jdev,null,null,requestUid);
             try {
-                System.out.println("Sending response :"+fimpResp.msgToString());
+                logger.fine("Sending response :"+fimpResp.msgToString());
                 mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
             } catch (MqttException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                logger.warning(e.getMessage());
             } catch (JSONException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                logger.warning(e.getMessage());
             }
 
         } catch (JSONException e) {
@@ -148,9 +156,11 @@ public class AdapterApi {
         try {
             mqttClient.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",fimpResp.msgToString().getBytes(),1,false);
         }catch (JSONException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            logger.warning(e.getMessage());
         }catch (MqttException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            logger.warning(e.getMessage());
         }
     }
 
@@ -174,6 +184,27 @@ public class AdapterApi {
         interfaces.put(getInterfaceJobj("out","evt.binary.report","bool"));
         interfaces.put(getInterfaceJobj("in","cmd.binary.set","bool"));
         interfaces.put(getInterfaceJobj("in","cmd.binary.get_report","null"));
+        switchService.put("interfaces",interfaces);
+        return switchService;
+    }
+
+    private JSONObject getColorCtrlServiceDescriptor(String id) throws JSONException {
+        JSONObject switchService = new JSONObject();
+        switchService.put("address","/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:"+id);
+        switchService.put("groups",new JSONArray().put("ch_1"));
+        switchService.put("name","color_ctrl");
+        switchService.put("location","");
+        JSONArray supComponents = new JSONArray();
+        supComponents.put("red");
+        supComponents.put("green");
+        supComponents.put("blue");
+        JSONObject props = new JSONObject();
+        props.put("sup_components",supComponents);
+        switchService.put("props",props);
+        JSONArray interfaces = new JSONArray();
+        interfaces.put(getInterfaceJobj("out","evt.color.report","int_map"));
+        interfaces.put(getInterfaceJobj("in","cmd.color.set","int_map"));
+        interfaces.put(getInterfaceJobj("in","cmd.color.get_report","null"));
         switchService.put("interfaces",interfaces);
         return switchService;
     }

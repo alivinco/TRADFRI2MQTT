@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>uk.me.hardill</groupId>
-  <artifactId>TRADFRI2MQTT</artifactId>
-  <version>0.0.5-SNAPSHOT</version>
+  <groupId>com.alivinco.tradfri</groupId>
+  <artifactId>ikea-ad</artifactId>
+  <version>0.1.1</version>
   <packaging>jar</packaging>
 
-  <name>TRADFRI2MQTT</name>
+  <name>ikea-ad</name>
   <url>http://maven.apache.org</url>
 
   <properties>

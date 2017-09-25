@@ -7,10 +7,13 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 
+import java.util.logging.Logger;
+
 /**
  * Created by alivinco on 02/05/2017.
  */
 public class FimpApi {
+    Logger logger = Logger.getLogger("ikea");
     MqttClient mqttClient;
     DeviceDb deviceDb;
     String binSwitchTopic = "pt:j1/mt:evt/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:";
@@ -24,7 +27,7 @@ public class FimpApi {
     public void reportSwitchStateChange(int id , boolean state ){
 
         if (!this.deviceDb.updateLightState(id,state)){
-            System.out.println("Switch value is not changed , skipp.");
+            logger.fine("Switch value is not changed , skipp.");
             return ;
         }
 
@@ -35,17 +38,17 @@ public class FimpApi {
             try {
                 this.mqttClient.publish(binSwitchTopic+Integer.toString(id) , binSwitchMsgMqtt);
             } catch (MqttException e) {
-                e.printStackTrace();
+                logger.warning(e.getMessage());
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.warning(e.getMessage());
         }
 
     }
 
     public void reportDimLvlChange(int id , int level ){
         if (!this.deviceDb.updateDimLevel(id,level)){
-            System.out.println("Dim value is not changed , skipp.");
+            logger.fine("Dim value is not changed , skipp.");
             return ;
         }
         level = (int)Math.round(level/2.55);
@@ -56,10 +59,10 @@ public class FimpApi {
             try {
                 this.mqttClient.publish(lvlSwitchTopic+Integer.toString(id) , lvlSwitchMsgMqtt);
             } catch (MqttException e) {
-                e.printStackTrace();
+                logger.warning(e.getMessage());
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.warning(e.getMessage());
         }
 
     }

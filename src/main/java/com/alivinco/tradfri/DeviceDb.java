@@ -1,13 +1,14 @@
 package com.alivinco.tradfri;
 
 import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Created by alivinco on 25/04/2017.
  */
 public class DeviceDb {
     Hashtable<Integer,Device> deviceDb;
-
+    Logger logger = Logger.getLogger("ikea");
     public DeviceDb(){
         this.deviceDb = new Hashtable<Integer,Device>();
     }
@@ -25,7 +26,7 @@ public class DeviceDb {
             newDev.swVersion = swVersion;
             newDev.hwVersion = "1";
             deviceDb.put(instanceId,newDev);
-            System.out.println("Device DB size = "+deviceDb.size());
+            logger.fine("Device DB size = "+deviceDb.size());
             return true;
         }
         return false;
@@ -44,7 +45,7 @@ public class DeviceDb {
             }
         }else {
             // TODO : rise exception
-            System.out.println("Device doesn't exist . Use upsert device first");
+            logger.fine("Device doesn't exist . Use upsert device first");
         }
         return false;
     }
@@ -57,8 +58,7 @@ public class DeviceDb {
                 return true;
             }
         }else {
-            // TODO : rise exception
-            System.out.println("Device doesn't exist . Use upsert device first");
+            logger.fine("Device doesn't exist . Use upsert device first");
         }
         return false;
     }

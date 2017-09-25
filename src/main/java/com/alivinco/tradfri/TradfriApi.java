@@ -18,12 +18,14 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 import static com.alivinco.tradfri.TradfriConstants.*;
 import static com.alivinco.tradfri.TradfriConstants.DIMMER_MIN;
@@ -39,6 +41,7 @@ interface TradfriApiEvents {
 }
 
 public class TradfriApi extends GwDiscovery {
+    Logger logger = Logger.getLogger("ikea");
     private DTLSConnector dtlsConnector;
     private Vector<CoapObserveRelation> watching = new Vector<>();
     private CoapEndpoint endPoint;
@@ -54,10 +57,10 @@ public class TradfriApi extends GwDiscovery {
         this.configFilePath = configFilePath;
         loadConectionInfoFromFile();
         if (connInfo.isConfigured){
-            System.out.println("Connecting to gateway");
+            logger.info("Connecting to gateway");
             connect();
         }else {
-            System.out.println("Adapter is not configured.Configure first.");
+            logger.info("Adapter is not configured.Configure first.");
         }
 
 
@@ -72,16 +75,18 @@ public class TradfriApi extends GwDiscovery {
             connInfo.gwIpAddress = jconfig.getString("gw_ip_address");
             connInfo.gwPskKey = jconfig.getString("gw_psk");
             if ( !connInfo.gwId.isEmpty() && !connInfo.gwIpAddress.isEmpty() && !connInfo.gwPskKey.isEmpty()) {
-                System.out.println("Connection is configured");
-                System.out.println(connInfo.gwId+";"+connInfo.gwIpAddress+";"+connInfo.gwPskKey);
+                logger.info("Connection is configured");
                 connInfo.isConfigured = true;
             }
 
         } catch (JSONException e) {
+            logger.warning(e.getMessage());
             e.printStackTrace();
+            logger.warning(e.getMessage());
             this.connInfo.isConfigured = false;
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warning(e.getMessage());
             saveConectionInfoToFile();
             this.connInfo.isConfigured = false;
         }
@@ -95,11 +100,13 @@ public class TradfriApi extends GwDiscovery {
             jconf.put("gw_ip_address",connInfo.gwIpAddress);
             jconf.put("gw_psk",connInfo.gwPskKey);
         } catch (JSONException e) {
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
         try {
             Files.write(Paths.get(this.configFilePath), jconf.toString().getBytes());
         } catch (IOException e) {
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -171,7 +178,7 @@ public class TradfriApi extends GwDiscovery {
         this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + GROUPS + "/" + id, json.toString());
     }
 
-    public void lightColorCtrl(int id , String color) throws JSONException {
+    public void lightColorCtrlOld(int id , String color) throws JSONException {
         JSONObject json = new JSONObject();
         JSONObject settings = new JSONObject();
         JSONArray array = new JSONArray();
@@ -188,28 +195,42 @@ public class TradfriApi extends GwDiscovery {
 				settings.put(COLOR, COLOR_WARM);
 				break;
 			default:
-			    System.err.println("Invalid temperature supplied: " + color);
+                logger.info("Invalid temperature supplied: " + color);
 		}
         this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + id, json.toString());
 
     }
 
+    public void lightColorControl(int id,int red ,int green,int blue) throws JSONException {
+        JSONObject json = new JSONObject();
+        JSONObject settings = new JSONObject();
+        JSONArray array = new JSONArray();
+        array.put(settings);
+        json.put(LIGHT, array);
+        List xyList = Color.convertRGBtoXY(red,green,blue);
+        settings.put(COLOR_X,xyList.get(0));
+        settings.put(COLOR_Y,xyList.get(1));
+//        settings.put(COLOR,Color.convertRGBtoHex(red,green,blue));
+        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + id, json.toString());
+    }
+
     private void sendMsg(String uriString, String payload) {
-        System.out.println("Sending message \n" + payload);
+        logger.info("Sending message \n" + payload);
         try {
             URI uri = new URI(uriString);
             CoapClient client = new CoapClient(uri);
             client.setEndpoint(endPoint);
             CoapResponse response = client.put(payload, MediaTypeRegistry.TEXT_PLAIN);
             if (response.isSuccess()) {
-                System.out.println("Ok");
+                logger.fine("ok");
             } else {
-                System.out.println("Fail");
+                logger.fine("failed");
             }
 
             client.shutdown();
 
         } catch (URISyntaxException e) {
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -246,7 +267,7 @@ public class TradfriApi extends GwDiscovery {
 
             @Override
             public void run() {
-                System.out.println("re-reg");
+                logger.info("re-reg");
                 for(CoapObserveRelation rel: watching) {
                     rel.reregister();
                 }
@@ -280,33 +301,31 @@ public class TradfriApi extends GwDiscovery {
         //bulbs
         try {
             URI uri = new URI("coaps://" + connInfo.gwIpAddress + "//" + DEVICES);
-            System.out.println("Connecting to ip = "+connInfo.gwIpAddress);
+            logger.info("Connecting to ip = "+connInfo.gwIpAddress);
             CoapClient client = new CoapClient(uri);
             client.setEndpoint(endPoint);
 
             CoapResponse response = client.get();
             if (response == null) {
-                System.out.println("1 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
-//                System.exit(-1);
+                logger.warning("1 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
                 connInfo.isConnected = false;
                 executor.shutdown();
                 return;
             }
             connInfo.isConnected = true;
-            System.out.println("Devices: "+response.getResponseText());
+            logger.info("Devices: "+response.getResponseText());
 
             JSONArray array = new JSONArray(response.getResponseText());
             for (int i=0; i<array.length(); i++) {
                 String devUri = "coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + array.getInt(i);
-                System.out.println("Discovering device with url: "+devUri);
                 this.subscribeForCoapMessages(devUri);
             }
             client.shutdown();
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
+            logger.warning(e.getMessage());
             e.printStackTrace();
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
 
@@ -316,8 +335,7 @@ public class TradfriApi extends GwDiscovery {
             client.setEndpoint(endPoint);
             CoapResponse response = client.get();
             if (response == null) {
-                System.out.println("2 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
-//                System.exit(-1);
+                logger.warning("2 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
                 connInfo.isConnected = false;
             }
             JSONArray array = new JSONArray(response.getResponseText());
@@ -327,10 +345,10 @@ public class TradfriApi extends GwDiscovery {
             }
             client.shutdown();
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
+            logger.warning(e.getMessage());
             e.printStackTrace();
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -354,8 +372,7 @@ public class TradfriApi extends GwDiscovery {
 
                 @Override
                 public void onError() {
-                    // TODO Auto-generated method stub
-                    System.out.println("problem with observe");
+                    logger.warning("problem with observe");
                 }
             };
             CoapObserveRelation relation = client.observe(handler);
@@ -363,8 +380,8 @@ public class TradfriApi extends GwDiscovery {
 
 
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            logger.warning(e.getMessage());
         }
 
     }

@@ -7,6 +7,7 @@ import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 /**
  * Created by alivinco on 28/06/2017.
@@ -16,6 +17,7 @@ import java.net.UnknownHostException;
 //interface GwUpdate
 
 public class GwDiscovery {
+    Logger logger = Logger.getLogger("ikea");
     protected String gwId;
     protected String gwIpAddress;
     JmDNS jmdns;
@@ -25,9 +27,9 @@ public class GwDiscovery {
 //            System.out.println("Service added: " + event.getInfo());
             ServiceInfo info = event.getDNS().getServiceInfo(event.getType(), event.getName());
 //            System.out.println("Service address: " + info.getInet4Addresses()[0].getHostAddress());
-            System.out.println("Service name: " +info.getName());
+            logger.info("Service name: " +info.getName());
             for (InetAddress addr:info.getInet4Addresses()) {
-                System.out.println("Service address: " +addr.getHostAddress());
+                logger.info("Service address: " +addr.getHostAddress());
                 gwId = info.getName();
                 gwIpAddress = addr.getHostAddress();
                 GwDiscovery.this.onGwDiscovered(info.getName(),addr.getHostAddress());
@@ -37,24 +39,24 @@ public class GwDiscovery {
 
         @Override
         public void serviceRemoved(ServiceEvent event) {
-            System.out.println("Service removed: " + event.getInfo());
+            logger.info("Service removed: " + event.getInfo());
         }
 
         @Override
         public void serviceResolved(ServiceEvent event) {
-            System.out.println("Service resolved: " + event.getInfo());
+            logger.info("Service resolved: " + event.getInfo());
         }
     }
 
     void onGwDiscovered(String gwId , String gwIpAddress)  {
-        System.out.println("<GwDiscovery> New gateway is discovered. GW id = " +gwId+" IP = "+gwIpAddress);
+        logger.info("<GwDiscovery> New gateway is discovered. GW id = " +gwId+" IP = "+gwIpAddress);
     }
 
     void requestServiceInfoAsync() {
         ServiceInfo []infos = jmdns.list("_coap._udp.local.");
         for(ServiceInfo info:infos) {
             for (InetAddress addr:info.getInet4Addresses()) {
-                System.out.println("Service address: " +addr.getHostAddress());
+                logger.info("Service address: " +addr.getHostAddress());
                 gwId = info.getName();
                 gwIpAddress = addr.getHostAddress();
                 GwDiscovery.this.onGwDiscovered(info.getName(),addr.getHostAddress());
@@ -66,16 +68,16 @@ public class GwDiscovery {
 
     GwDiscovery() {
         try {
-            System.out.println("Starting gateway discovery");
+            logger.info("Starting gateway discovery");
             // Create a JmDNS instance
             jmdns = JmDNS.create(InetAddress.getLocalHost());
             // Add a service listener
             jmdns.addServiceListener("_coap._udp.local.", new SampleListener());
 
         } catch (UnknownHostException e) {
-            System.out.println(e.getMessage());
+            logger.warning(e.getMessage());
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            logger.warning(e.getMessage());
         }
     }
 

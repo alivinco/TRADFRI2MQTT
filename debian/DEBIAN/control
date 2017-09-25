@@ -1,7 +1,6 @@
-Package: fimpui
-Version: 0.0.6
-Replaces: fimpui
-Architecture: armhf
+Package: ikea-ad
+Version: 0.1.1
+Replaces: ikea-ad
+Architecture: all
 Maintainer: Aleksandrs Livincovs <aleksandrs.livincovs@gmail.com>
-Description: FimpUI is support GUI for FIMP protocol .
-
+Description: Ikea Tradgri - FIMP adapter .

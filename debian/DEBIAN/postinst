@@ -52,7 +52,7 @@ add_user_and_group()
 
 set_ownership()
 {
-	chown -R fimp:fimp "/opt/fimpui"
+	chown -R fimp:fimp "/opt/ikea-ad"
 }
 
 
@@ -61,11 +61,11 @@ case "$1" in
 		add_user_and_group
 		set_ownership
 
-		# Start fimpui
-		if [ -f /opt/fimpui/fimpui ]
+		# Start ikea-ad
+		if [ -d /opt/ikea-ad ]
 		then
-		    systemctl enable fimpui.service
-			systemctl start fimpui.service
+		    systemctl enable ikea-ad.service
+			systemctl start ikea-ad.service
 		fi
 	;;
 
