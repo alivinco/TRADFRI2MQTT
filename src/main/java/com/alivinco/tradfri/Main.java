@@ -48,15 +48,19 @@ public class Main {
 	private MsgRouter msgRouter;
 
 	
-	Main(String broker,String configFilePath) {
+	Main(String broker,String configFilePath, String username, String password) {
 		this.deviceDb = new DeviceDb();
 		MemoryPersistence persistence = new MemoryPersistence();
 		try {
 			MqttConnectOptions options = new MqttConnectOptions();
+                        if (username != null && password != null) {
+                                options.setUserName(username);
+                                options.setPassword(password.toCharArray());
+                        }
 			options.setAutomaticReconnect(true);
 			options.setMaxInflight(200);
 			mqttClient = new MqttClient(broker, MqttClient.generateClientId(), persistence);
-            mqttClient.connect(options);
+			mqttClient.connect(options);
 			this.fimpApi = new FimpApi(mqttClient,this.deviceDb);
 			this.tradfriApi = new TradfriApi(configFilePath);
 			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient,this.tradfriApi );
@@ -117,6 +121,8 @@ public class Main {
 		Options options = new Options();
 		options.addOption("conf", true, "Configuration storage file path ");
 		options.addOption("broker", true, "MQTT URL");
+                options.addOption("username", true, "MQTT username");
+                options.addOption("password", true, "MQTT password");
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
@@ -128,6 +134,8 @@ public class Main {
 		
 		String confFile = cmd.getOptionValue("conf");
 		String broker = cmd.getOptionValue("broker");
+                String username = cmd.getOptionValue("username");
+                String password = cmd.getOptionValue("password");
 		
 		if (confFile == null || broker == null) {
 			HelpFormatter formatter = new HelpFormatter();
@@ -135,7 +143,7 @@ public class Main {
 			System.exit(1);
 		}
 
-		Main m = new Main(broker,confFile);
+		Main m = new Main(broker,confFile, username, password);
 
 	}
 
