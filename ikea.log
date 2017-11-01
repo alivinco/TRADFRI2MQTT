@@ -1,0 +1,96 @@
+Nov 01, 2017 9:12:06 PM com.alivinco.tradfri.Main setupLogger
+INFO: First log entry
+Nov 01, 2017 9:12:06 PM com.alivinco.tradfri.Main main
+INFO: Loading configurations
+Nov 01, 2017 9:12:07 PM com.alivinco.tradfri.GwDiscovery <init>
+INFO: Starting gateway discovery
+Nov 01, 2017 9:12:07 PM com.alivinco.tradfri.TradfriApi loadConectionInfoFromFile
+INFO: Connection is configured
+Nov 01, 2017 9:12:07 PM com.alivinco.tradfri.TradfriApi <init>
+INFO: Connecting to gateway
+Nov 01, 2017 9:12:07 PM com.alivinco.tradfri.TradfriApi discoverDevicesAndGroups
+INFO: Connecting to ip = 192.168.0.29
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.TradfriApi discoverDevicesAndGroups
+INFO: Devices: [65539,65536,65540,65537,65542,65538,65543]
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 1
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"","address":"162027","device_id":"","product_id":"","comm_tech":"ikea","alias":"Olohuone","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:162027","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:162027","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:162027","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"","product_name":"","power_source":"ac","sw_ver":""},"serv":"ikea","ctime":"2017-11-01 21:12:09.585","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 2
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"","address":"162028","device_id":"","product_id":"","comm_tech":"ikea","alias":"TRADFRI group 4","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:162028","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:162028","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:162028","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"","product_name":"","power_source":"ac","sw_ver":""},"serv":"ikea","ctime":"2017-11-01 21:12:09.625","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.FimpApi reportSwitchStateChange
+FINE: Switch value is not changed , skipp.
+Nov 01, 2017 9:12:09 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.TradfriApi$1 run
+INFO: re-reg
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 3
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"IKEA of Sweden","address":"65540","device_id":"","product_id":"TRADFRI bulb E27 CWS opal 600lm","comm_tech":"ikea","alias":"","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:65540","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:65540","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:65540","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"TRADFRI bulb E27 CWS opal 600lm","product_name":"TRADFRI bulb E27 CWS opal 600lm","power_source":"ac","sw_ver":"1.3.002"},"serv":"ikea","ctime":"2017-11-01 21:12:17.644","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportSwitchStateChange
+FINE: Switch value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 4
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"IKEA of Sweden","address":"65537","device_id":"","product_id":"TRADFRI bulb E27 WS opal 980lm","comm_tech":"ikea","alias":"TRADFRI bulb E27 WS opal 980lm","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:65537","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:65537","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:65537","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"TRADFRI bulb E27 WS opal 980lm","product_name":"TRADFRI bulb E27 WS opal 980lm","power_source":"ac","sw_ver":"1.2.217"},"serv":"ikea","ctime":"2017-11-01 21:12:17.686","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 5
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"IKEA of Sweden","address":"65542","device_id":"","product_id":"TRADFRI bulb E27 CWS opal 600lm","comm_tech":"ikea","alias":"","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:65542","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:65542","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:65542","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"TRADFRI bulb E27 CWS opal 600lm","product_name":"TRADFRI bulb E27 CWS opal 600lm","power_source":"ac","sw_ver":"1.3.002"},"serv":"ikea","ctime":"2017-11-01 21:12:17.704","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 6
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"IKEA of Sweden","address":"65538","device_id":"","product_id":"TRADFRI bulb E27 WS opal 980lm","comm_tech":"ikea","alias":"TRADFRI bulb E27 WS opal 980lm 2","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:65538","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:65538","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:65538","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"TRADFRI bulb E27 WS opal 980lm","product_name":"TRADFRI bulb E27 WS opal 980lm","power_source":"ac","sw_ver":"1.2.217"},"serv":"ikea","ctime":"2017-11-01 21:12:17.723","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 7
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"","address":"146671","device_id":"","product_id":"","comm_tech":"ikea","alias":"Teatterihuone","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:146671","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:146671","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:146671","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"","product_name":"","power_source":"ac","sw_ver":""},"serv":"ikea","ctime":"2017-11-01 21:12:17.744","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportSwitchStateChange
+FINE: Switch value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.DeviceDb upsertDevice
+FINE: Device DB size = 8
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.AdapterApi sendInclusionReport
+FINE: Sending response :{"val":{"hw_ver":"1","manufacturer_id":"","address":"151222","device_id":"","product_id":"","comm_tech":"ikea","alias":"Makkari","services":[{"interfaces":[{"ver":"1","msg_t":"evt.binary.report","val_t":"bool","intf_t":"out"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/ad:151222","name":"out_bin_switch","groups":["ch_1"],"location":"","props":{}},{"interfaces":[{"ver":"1","msg_t":"evt.lvl.report","val_t":"int","intf_t":"out"},{"ver":"1","msg_t":"cmd.lvl.set","val_t":"int","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.start","val_t":"string","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.stop","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.lvl.get_report","val_t":"null","intf_t":"in"},{"ver":"1","msg_t":"cmd.binary.set","val_t":"bool","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/ad:151222","name":"out_lvl_switch","groups":["ch_1"],"location":"","props":{"max_lvl":254,"min_lvl":0}},{"interfaces":[{"ver":"1","msg_t":"evt.color.report","val_t":"int_map","intf_t":"out"},{"ver":"1","msg_t":"cmd.color.set","val_t":"int_map","intf_t":"in"},{"ver":"1","msg_t":"cmd.color.get_report","val_t":"null","intf_t":"in"}],"address":"/rt:dev/rn:ikea/ad:1/sv:color_ctrl/ad:151222","name":"color_ctrl","groups":["ch_1"],"location":"","props":{"sup_components":["red","green","blue"]}}],"product_hash":"","product_name":"","power_source":"ac","sw_ver":""},"serv":"ikea","ctime":"2017-11-01 21:12:17.763","val_t":"object","type":"evt.thing.inclusion_report","props":{},"tags":[]}
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportSwitchStateChange
+FINE: Switch value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportSwitchStateChange
+FINE: Switch value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportSwitchStateChange
+FINE: Switch value is not changed , skipp.
+Nov 01, 2017 9:12:17 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:25 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:25 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:26 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:26 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:28 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:28 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:28 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:28 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:53 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:53 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:54 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.
+Nov 01, 2017 9:12:54 PM com.alivinco.tradfri.FimpApi reportDimLvlChange
+FINE: Dim value is not changed , skipp.

@@ -73,6 +73,7 @@ public class TradfriApi extends GwDiscovery {
             JSONObject jconfig = new JSONObject(confStr );
             connInfo.gwId = jconfig.getString("gw_id");
             connInfo.gwIpAddress = jconfig.getString("gw_ip_address");
+            connInfo.gwUserName = jconfig.getString("gw_username");
             connInfo.gwPskKey = jconfig.getString("gw_psk");
             if ( !connInfo.gwId.isEmpty() && !connInfo.gwIpAddress.isEmpty() && !connInfo.gwPskKey.isEmpty()) {
                 logger.info("Connection is configured");
@@ -98,6 +99,7 @@ public class TradfriApi extends GwDiscovery {
         try {
             jconf.put("gw_id",connInfo.gwId);
             jconf.put("gw_ip_address",connInfo.gwIpAddress);
+            jconf.put("gw_username",connInfo.gwUserName);
             jconf.put("gw_psk",connInfo.gwPskKey);
         } catch (JSONException e) {
             logger.warning(e.getMessage());
@@ -234,27 +236,28 @@ public class TradfriApi extends GwDiscovery {
             e.printStackTrace();
         }
     }
-    public void configure(String gwId,String ipAddress,String psk) {
+    public void configure(String gwId,String ipAddress,String username,String psk) {
         connInfo.gwId = gwId;
         connInfo.gwIpAddress = ipAddress;
+        connInfo.gwUserName = username;
         connInfo.gwPskKey = psk;
         connInfo.isConfigured = true;
         saveConectionInfoToFile();
     }
     public String connect() {
-        return  connect(null,null,null);
+        return  connect(null,null,null,null);
     }
 
-    public String connect(String gwId,String ipAddress,String psk) {
-        if (gwId == null || ipAddress == null || psk == null)  {
+    public String connect(String gwId,String ipAddress,String username,String psk) {
+        if (gwId == null || ipAddress == null || username == null ||psk == null)  {
             if (!connInfo.isConfigured)
                 return "CONFIG_ERR_EMPTY_PARAM";
         }else {
-            configure(gwId,ipAddress,psk);
+            configure(gwId,ipAddress,username,psk);
         }
 
         DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder(new InetSocketAddress(0));
-        builder.setPskStore(new StaticPskStore("", connInfo.gwPskKey.getBytes()));
+        builder.setPskStore(new StaticPskStore(connInfo.gwUserName, connInfo.gwPskKey.getBytes()));
         dtlsConnector = new DTLSConnector(builder.build());
         endPoint = new CoapEndpoint(dtlsConnector, NetworkConfig.getStandard());
 

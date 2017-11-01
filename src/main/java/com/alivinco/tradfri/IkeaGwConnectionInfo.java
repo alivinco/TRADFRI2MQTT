@@ -6,6 +6,7 @@ package com.alivinco.tradfri;
 public class IkeaGwConnectionInfo {
     String gwId;
     String gwIpAddress;
+    String gwUserName;
     String gwPskKey;
     boolean isConfigured;
     boolean isConnected;

@@ -94,7 +94,7 @@ public class AdapterApi {
                 JSONObject jconfig = fimp.getJsonObjectValue();
 
                 try {
-                    this.tradfriApi.connect(jconfig.getString("id"),jconfig.getString("address"),jconfig.getString("security_key"));
+                    this.tradfriApi.connect(jconfig.getString("id"),jconfig.getString("address"),jconfig.getString("username"),jconfig.getString("security_key"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

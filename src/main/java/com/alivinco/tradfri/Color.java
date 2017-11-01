@@ -21,7 +21,7 @@ public class Color {
         float red, green, blue;
 
         // Make red more vivid
-        if (normalizedToOne[0] > 0.04045) {
+        /*if (normalizedToOne[0] > 0.04045) {
             red = (float) Math.pow(
                     (normalizedToOne[0] + 0.055) / (1.0 + 0.055), 2.4);
         } else {
@@ -42,7 +42,11 @@ public class Color {
                     / (1.0 + 0.055), 2.4);
         } else {
             blue = (float) (normalizedToOne[2] / 12.92);
-        }
+        }*/
+
+        red = (float) (normalizedToOne[0]);
+        green = (float) (normalizedToOne[1]);
+        blue = (float) (normalizedToOne[2]);
 
         float X = (float) (red * 0.649926 + green * 0.103455 + blue * 0.197109);
         float Y = (float) (red * 0.234327 + green * 0.743075 + blue + 0.022598);
@@ -55,9 +59,14 @@ public class Color {
         float x = X / (X + Y + Z);
         float y = Y / (X + Y + Z);
 
+        System.out.println(x);
+        System.out.println(y);
+
         List<Integer> xyAsList = new ArrayList<Integer>();
-        xyAsList.add(Math.round(x*100));
-        xyAsList.add(Math.round(y*100));
+        //xyAsList.add(Math.round(x*100));
+        //xyAsList.add(Math.round(y*100));
+        xyAsList.add(Math.round(x*65535));
+        xyAsList.add(Math.round(y*65535));
         return xyAsList;
     }
 
