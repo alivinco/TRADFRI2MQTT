@@ -1,6 +1,5 @@
 package com.alivinco.tradfri;
 
-import com.alivinco.tradfri.types.HSBType;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapObserveRelation;
@@ -19,7 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,7 +41,7 @@ interface TradfriApiEvents {
     void onGwLostConnection(String gwId);
 }
 
-public class TradfriApi extends GwDiscovery {
+public class TradfriClient extends GwDiscovery {
     Logger logger = Logger.getLogger("ikea");
     private DTLSConnector dtlsConnector;
     private Vector<CoapObserveRelation> watching = new Vector<>();
@@ -51,11 +50,10 @@ public class TradfriApi extends GwDiscovery {
     private TradfriApiEvents eventsHandler;
     private IkeaGwConnectionInfo connInfo;
     private String configFilePath;
-    private String gwPskKey;
-    private String clientIdentity;
 
-    public TradfriApi(String configFilePath) {
+    public TradfriClient(String configFilePath) {
         connInfo = new IkeaGwConnectionInfo();
+        connInfo.identity = "";
         connInfo.isConnected = false;
         this.configFilePath = configFilePath;
         loadConectionInfoFromFile();
@@ -74,10 +72,12 @@ public class TradfriApi extends GwDiscovery {
         String confStr = null;
         try {
             confStr = new String(Files.readAllBytes(Paths.get(this.configFilePath)));
-            JSONObject jconfig = new JSONObject(confStr );
+            JSONObject jconfig = new JSONObject(confStr);
             connInfo.gwId = jconfig.getString("gw_id");
             connInfo.gwIpAddress = jconfig.getString("gw_ip_address");
             connInfo.gwPskKey = jconfig.getString("gw_psk");
+            connInfo.identity = jconfig.getString("identity");
+
             if ( !connInfo.gwId.isEmpty() && !connInfo.gwIpAddress.isEmpty() && !connInfo.gwPskKey.isEmpty()) {
                 logger.info("Connection is configured");
                 connInfo.isConfigured = true;
@@ -103,6 +103,7 @@ public class TradfriApi extends GwDiscovery {
             jconf.put("gw_id",connInfo.gwId);
             jconf.put("gw_ip_address",connInfo.gwIpAddress);
             jconf.put("gw_psk",connInfo.gwPskKey);
+            jconf.put("identity",connInfo.identity);
         } catch (JSONException e) {
             logger.warning(e.getMessage());
             e.printStackTrace();
@@ -139,65 +140,15 @@ public class TradfriApi extends GwDiscovery {
        }
     }
 
-    public void lightSwitchCtrl(int id , boolean state) throws JSONException {
-        JSONObject json = new JSONObject();
-        JSONObject settings = new JSONObject();
-        JSONArray array = new JSONArray();
-        array.put(settings);
-        json.put(LIGHT, array);
-        if (state) {
-            settings.put(ONOFF, 1);
-        } else {
-            settings.put(ONOFF, 0);
-        }
-        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + id, json.toString());
-
-    }
-    public void lightDimmerCtrl(int id , int level,int duration) throws JSONException {
-        JSONObject json = new JSONObject();
-        JSONObject settings = new JSONObject();
-        JSONArray array = new JSONArray();
-        array.put(settings);
-        json.put(LIGHT, array);
-        int lvlValue = (int)Math.round(level*2.55);
-        settings.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, lvlValue)));
-        settings.put(TRANSITION_TIME, duration);	// transition in seconds
-        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + id, json.toString());
+    public void sendToDevice(int id,JSONObject payload) {
+        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + id, payload.toString());
     }
 
-    public void lightSwitchGroupCtrl(int id , boolean state) throws JSONException {
-        JSONObject json = new JSONObject();
-        if (state) {
-                json.put(ONOFF, 1);
-        } else {
-                json.put(ONOFF, 0);
-        }
-        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + GROUPS + "/" + id, json.toString());
-    }
-    public void lightDimmerGroupCtrl(int id , int level,int duration) throws JSONException {
-        JSONObject json = new JSONObject();
-        int lvlValue = (int)Math.round(level*2.55);
-        json.put(DIMMER, Math.min(DIMMER_MAX, Math.max(DIMMER_MIN, lvlValue)));
-        json.put(TRANSITION_TIME, duration);	// transition in seconds
-        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + GROUPS + "/" + id, json.toString());
+    public void sendToGroup(int id,JSONObject payload) {
+        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + GROUPS + "/" + id, payload.toString());
     }
 
-    public void lightColorControl(int id,int red ,int green,int blue) throws JSONException {
-        JSONObject json = new JSONObject();
-        JSONObject settings = new JSONObject();
-        JSONArray array = new JSONArray();
-        array.put(settings);
-        json.put(LIGHT, array);
-
-        HSBType hsb = HSBType.fromRGB(red,green,blue);
-        ColorConverter color = ColorConverter.fromHSBType(hsb);
-        logger.info("Setting color x = " + color.xyX.toString()+" y = "+color.xyY.toString()+" \n");
-        settings.put(COLOR_X,color.xyX);
-        settings.put(COLOR_Y,color.xyY);
-        this.sendMsg("coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + id, json.toString());
-    }
-
-    private void sendMsg(String uriString, String payload) {
+    public void sendMsg(String uriString, String payload) {
         logger.info("Sending message \n" + payload);
         try {
             URI uri = new URI(uriString);
@@ -217,39 +168,48 @@ public class TradfriApi extends GwDiscovery {
             e.printStackTrace();
         }
     }
-    public void configure(String gwId,String ipAddress,String psk) {
+
+    /**
+     * Configures connection to IKEA gateway .
+     *
+     * @param gwId gateway Id
+     * @param ipAddress gatewayy IP address
+     * @param code security code printed on box
+     */
+    public String configure(String gwId,String ipAddress,String code) {
+        String identity = UUID.randomUUID().toString().replace("-", "");
+        String pskKey = obtainIdentityAndPreSharedKey(identity,code);
+        if (pskKey==null) {
+            connInfo.isConfigured = false;
+            return "ERROR_OBTAINING_PSK";
+        }else {
+            connInfo.isConfigured = true;
+        }
         connInfo.gwId = gwId;
         connInfo.gwIpAddress = ipAddress;
-        connInfo.gwPskKey = psk;
-        connInfo.isConfigured = true;
+        connInfo.gwPskKey = pskKey;
+        connInfo.identity = identity;
         saveConectionInfoToFile();
-    }
-    public String connect() {
-        return  connect(null,null,null);
+        return null;
     }
 
-    public String connect(String gwId,String ipAddress,String psk) {
-        clientIdentity = "ikea-ad-2";
-        if (gwId == null || ipAddress == null || psk == null)  {
-            if (!connInfo.isConfigured)
-                return "CONFIG_ERR_EMPTY_PARAM";
-        }else {
-            configure(gwId,ipAddress,psk);
-        }
-        //
-        if (!obtainIdentityAndPreSharedKey()) {
-            return "ERROR_OBTAINING_PSK";
-        }
+    /**
+     *  Creates endpoint connection .
+     * @return
+     */
+
+    public String connect() {
+        if (!connInfo.isConfigured)
+           return "CONFIG_ERR_EMPTY_PARAM";
 
         DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder(new InetSocketAddress(0));
-        builder.setPskStore(new StaticPskStore(clientIdentity, gwPskKey.getBytes()));
+        builder.setPskStore(new StaticPskStore(connInfo.identity, connInfo.gwPskKey.getBytes()));
         dtlsConnector = new DTLSConnector(builder.build());
         endPoint = new CoapEndpoint(dtlsConnector, NetworkConfig.getStandard());
 
         if (executor== null){
             executor = Executors.newScheduledThreadPool(1);
         }
-//        executor.shutdown();
 
         Runnable command = new Runnable() {
 
@@ -264,7 +224,7 @@ public class TradfriApi extends GwDiscovery {
         executor.scheduleAtFixedRate(command, 10, 2, TimeUnit.HOURS);
 
         discoverDevicesAndGroups();
-        return  "CONFIGURED";
+        return  "OK";
     }
 
     /**
@@ -274,7 +234,7 @@ public class TradfriApi extends GwDiscovery {
      *
      * @return true, if credentials were successfully obtained, false otherwise
      */
-    protected boolean obtainIdentityAndPreSharedKey() {
+    protected String obtainIdentityAndPreSharedKey(String identity,String code) {
 
         String preSharedKey = null;
 
@@ -283,7 +243,7 @@ public class TradfriApi extends GwDiscovery {
         String responseText = null;
         try {
             DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder(new InetSocketAddress(0));
-            builder.setPskStore(new StaticPskStore("Client_identity", connInfo.gwPskKey.getBytes()));
+            builder.setPskStore(new StaticPskStore("Client_identity", code.getBytes()));
 
             DTLSConnector dtlsConnector = new DTLSConnector(builder.build());
             CoapEndpoint authEndpoint = new CoapEndpoint(dtlsConnector, NetworkConfig.getStandard());
@@ -294,7 +254,7 @@ public class TradfriApi extends GwDiscovery {
             deviceClient.setEndpoint(authEndpoint);
 
             JSONObject json = new JSONObject();
-            json.put(CLIENT_IDENTITY_PROPOSED, clientIdentity);
+            json.put(CLIENT_IDENTITY_PROPOSED, identity);
 
             gatewayResponse = deviceClient.post(json.toString(), 0);
 
@@ -304,20 +264,19 @@ public class TradfriApi extends GwDiscovery {
             if (gatewayResponse == null) {
                 // seems we ran in a timeout, which potentially also happens
                 logger.warning("Wrong response can't authenticate ");
-                return false;
+                return null;
             }
 
             if (gatewayResponse.isSuccess()) {
                 responseText = gatewayResponse.getResponseText();
                 json = new JSONObject(responseText);
                 preSharedKey = json.getString(NEW_PSK_BY_GW);
-                gwPskKey = preSharedKey;
                 if (preSharedKey=="") {
                     logger.warning("Empty pre-shared key");
-                    return false;
+                    return null;
                 } else {
                     logger.info("Received pre-shared key for gateway ");
-                    return true;
+                    return preSharedKey;
                 }
             } else {
                 logger.warning(String.format("Failed obtaining pre-shared key with status code '%s'", gatewayResponse.getCode()));
@@ -327,7 +286,7 @@ public class TradfriApi extends GwDiscovery {
         } catch (JSONException e) {
             logger.warning("Invalid response recieved from gateway '{}'"+ e.getMessage());
         }
-        return false;
+        return null;
     }
 
 
@@ -338,6 +297,7 @@ public class TradfriApi extends GwDiscovery {
         connInfo.gwId = "";
         connInfo.gwIpAddress = "";
         connInfo.gwPskKey = "";
+        connInfo.identity = "";
         connInfo.isConfigured = false;
         connInfo.isConnected = false;
         saveConectionInfoToFile();
@@ -392,6 +352,8 @@ public class TradfriApi extends GwDiscovery {
             if (response == null) {
                 logger.warning("2 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
                 connInfo.isConnected = false;
+            }else {
+                logger.info("Groups: "+response.getResponseText());
             }
             JSONArray array = new JSONArray(response.getResponseText());
             for (int i=0; i<array.length(); i++) {
@@ -420,15 +382,13 @@ public class TradfriApi extends GwDiscovery {
             CoapClient client = new CoapClient(uri);
             client.setEndpoint(endPoint);
 
-
-
             CoapHandler handler = new CoapHandler() {
 
                 @Override
                 public void onLoad(CoapResponse response) {
                    //Main.this.msgRouter.onCoapMessage(response);
-                    if(TradfriApi.this.connInfo.isConnected)
-                        TradfriApi.this.eventsHandler.onCoapMessage(response);
+                    if(TradfriClient.this.connInfo.isConnected)
+                        TradfriClient.this.eventsHandler.onCoapMessage(response);
                 }
 
                 @Override
