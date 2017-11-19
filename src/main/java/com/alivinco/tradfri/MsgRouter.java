@@ -23,7 +23,7 @@ public class MsgRouter implements TradfriApiEvents {
     private FimpApi fimpApi;
     private TradfriApi tradfriApi;
 
-    public MsgRouter(AdapterApi adApi,FimpApi fimpApi,TradfriApi tradfriApi,DeviceDb deviceDb) {
+    public MsgRouter(AdapterApi adApi, FimpApi fimpApi, TradfriApi tradfriApi, DeviceDb deviceDb) {
 
         this.adApi = adApi;
         this.fimpApi = fimpApi;
@@ -129,13 +129,13 @@ public class MsgRouter implements TradfriApiEvents {
                     System.err.println("Bulb '" + json.getString(NAME) + "' has no dimming value (maybe just no power on lightbulb socket)");
                 }
 
-                MqttMessage message3 = null;
-                if (light.has(COLOR)) {
-                    message3 = new MqttMessage();
-                    String temperature = light.getString(COLOR);
-                    message3.setPayload(temperature.getBytes());
+                if (light.has(COLOR_X)&&light.has(COLOR_Y)) {
+                    logger.info("Color X = "+light.getInt(COLOR_X)+" Y = "+light.getInt(COLOR_Y));
+                    ColorConverter color = ColorConverter.fromCie(light.getInt(COLOR_X),light.getInt(COLOR_Y),light.getInt(DIMMER));
+                    logger.info("Color R = "+color.rgbR+" G = "+color.rgbG+" B = "+color.rgbB);
+                    fimpApi.reportColorChange(json.getInt(INSTANCE_ID),color.rgbR,color.rgbG,color.rgbB);
                 } else { // just fyi for the user. maybe add further handling later
-                    System.out.println("Bulb '" + json.getString(NAME) + "' doesn't support color temperature");
+                    System.out.println("Bulb '" + json.getString(NAME) + "' doesn't support color");
                 }
 
             } else if (json.has(HS_ACCESSORY_LINK)) { // groups have this entry

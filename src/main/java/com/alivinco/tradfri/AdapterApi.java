@@ -19,13 +19,13 @@ import static com.alivinco.tradfri.TradfriConstants.*;
 public class AdapterApi {
     private DeviceDb deviceDb;
     private MqttClient mqttClient;
-    private TradfriApi tradfriApi;
+    private TradfriClient tradfriApi;
     private String requestId;
     Logger logger = Logger.getLogger("ikea");
-    public AdapterApi(DeviceDb deviceDb,MqttClient mqttClient , TradfriApi tradfriApi){
+    public AdapterApi(DeviceDb deviceDb,MqttClient mqttClient , TradfriClient tradfriClient){
         this.deviceDb = deviceDb;
         this.mqttClient = mqttClient;
-        this.tradfriApi = tradfriApi;
+        this.tradfriApi = tradfriClient;
 
     }
     public boolean onMessage(String topic , FimpMessage fimp){
@@ -94,7 +94,8 @@ public class AdapterApi {
                 JSONObject jconfig = fimp.getJsonObjectValue();
 
                 try {
-                    this.tradfriApi.connect(jconfig.getString("id"),jconfig.getString("address"),jconfig.getString("security_key"));
+                    this.tradfriApi.configure(jconfig.getString("id"),jconfig.getString("address"),jconfig.getString("security_key"));
+                    this.tradfriApi.connect();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -129,7 +130,10 @@ public class AdapterApi {
             jdev.put("power_source","ac");
             jdev.put("product_hash",dev.productName);
             jdev.put("product_id",dev.productName);
-            jdev.put("product_name",dev.productName);
+            if (dev.alias==""||dev.alias==null)
+                jdev.put("product_name",dev.productName);
+            else
+                jdev.put("product_name",dev.alias);
             jdev.put("services",services);
             FimpMessage fimpResp = new FimpMessage("ikea","evt.thing.inclusion_report",jdev,null,null,requestUid);
             try {

@@ -7,6 +7,7 @@ public class IkeaGwConnectionInfo {
     String gwId;
     String gwIpAddress;
     String gwPskKey;
+    String identity;
     boolean isConfigured;
     boolean isConnected;
 }

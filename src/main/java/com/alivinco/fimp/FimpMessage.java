@@ -115,14 +115,14 @@ public class FimpMessage {
             try{
                 fimp.props = toMap(reqJson.getJSONObject("props"));
             }catch (Exception e){
-
+                fimp.props = new HashMap<String,String>();
             }
 
         if (reqJson.has("tags"))
             try{
                 fimp.tags = toList(reqJson.getJSONArray("tags"));
             }catch (Exception e){
-
+                fimp.tags = new ArrayList<String>();
             }
         if (reqJson.has("uid"))
             fimp.corid = reqJson.getString("uid");

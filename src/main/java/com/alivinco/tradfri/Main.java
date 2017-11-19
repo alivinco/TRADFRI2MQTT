@@ -13,7 +13,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.eclipse.californium.core.CaliforniumLogger;
-import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.scandium.ScandiumLogger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -23,7 +22,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -44,10 +42,10 @@ public class Main {
 	private DeviceDb deviceDb;
 	private AdapterApi adApi;
 	private FimpApi fimpApi;
+	private TradfriClient tradfriClient;
 	private TradfriApi tradfriApi;
 	private MsgRouter msgRouter;
 
-	
 	Main(String broker,String configFilePath) {
 		this.deviceDb = new DeviceDb();
 		MemoryPersistence persistence = new MemoryPersistence();
@@ -58,8 +56,9 @@ public class Main {
 			mqttClient = new MqttClient(broker, MqttClient.generateClientId(), persistence);
             mqttClient.connect(options);
 			this.fimpApi = new FimpApi(mqttClient,this.deviceDb);
-			this.tradfriApi = new TradfriApi(configFilePath);
-			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient,this.tradfriApi );
+			this.tradfriClient = new TradfriClient(configFilePath);
+			this.tradfriApi = new TradfriApi(this.tradfriClient);
+			this.adApi = new AdapterApi(this.deviceDb,this.mqttClient,this.tradfriClient);
 			this.msgRouter = new MsgRouter(this.adApi,this.fimpApi,this.tradfriApi,this.deviceDb);
 			mqttClient.setCallback(new MqttCallback() {
 				
@@ -80,7 +79,8 @@ public class Main {
 //					cause.printStackTrace();
 				}
 			});
-			tradfriApi.setEventsHandler(this.msgRouter);
+			tradfriClient.setEventsHandler(this.msgRouter);
+			tradfriClient.init();
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_bin_switch/+");
 			mqttClient.subscribe("pt:j1/mt:cmd/rt:dev/rn:ikea/ad:1/sv:out_lvl_switch/+");
@@ -111,7 +111,6 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//-psk LUMozPGBWkaFSCgU
 		Main.setupLogger();
 		logger.info("Loading configurations");
 		Options options = new Options();

@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class ColorTest {
     @Test
     public void convertRGBtoXY() throws Exception {
-        System.out.print(Color.convertRGBtoXY(100,1,1));
+//        System.out.print(Color.convertRGBtoXY(0,255,0));
     }
 
 }
