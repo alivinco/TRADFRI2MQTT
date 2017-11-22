@@ -18,6 +18,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.Executors;
@@ -50,6 +52,10 @@ public class TradfriClient extends GwDiscovery {
     private TradfriApiEvents eventsHandler;
     private IkeaGwConnectionInfo connInfo;
     private String configFilePath;
+    private Set<Integer> devices = new HashSet<>();
+    private Set<Integer> groups  = new HashSet<>();
+
+
 
     public TradfriClient(String configFilePath) {
         connInfo = new IkeaGwConnectionInfo();
@@ -224,6 +230,7 @@ public class TradfriClient extends GwDiscovery {
         executor.scheduleAtFixedRate(command, 10, 2, TimeUnit.HOURS);
 
         discoverDevicesAndGroups();
+        observeNetworkUpdates();
         return  "OK";
     }
 
@@ -330,6 +337,7 @@ public class TradfriClient extends GwDiscovery {
             JSONArray array = new JSONArray(response.getResponseText());
             for (int i=0; i<array.length(); i++) {
                 String devUri = "coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + array.getInt(i);
+                this.devices.add(array.getInt(i));
                 client.setURI(devUri);
                 CoapResponse devResponse = client.get();
                 this.eventsHandler.onCoapMessage(devResponse);
@@ -370,6 +378,60 @@ public class TradfriClient extends GwDiscovery {
         } catch (JSONException e) {
             logger.warning(e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void observeNetworkUpdates() {
+        try {
+            URI uri = new URI("coaps://" + connInfo.gwIpAddress + "//" + DEVICES);
+
+            CoapClient client = new CoapClient(uri);
+            client.setEndpoint(endPoint);
+
+            CoapHandler handler = new CoapHandler() {
+
+                @Override
+                public void onLoad(CoapResponse response) {
+                    //Main.this.msgRouter.onCoapMessage(response);
+                    logger.info("Network changes : "+response.getResponseText());
+                    try {
+                        JSONArray array = new JSONArray(response.getResponseText());
+                        for (int i=0; i<array.length(); i++) {
+//                            TradfriClient.this.eventsHandler.onNetworkUpdate(array,false);
+                            if (!devices.contains(array.getInt(i))) {
+                                logger.info("New device discovered = "+array.getInt(i));
+                                String devUri = "coaps://" + connInfo.gwIpAddress + "//" + DEVICES + "/" + array.getInt(i);
+                                TradfriClient.this.devices.add(array.getInt(i));
+                                client.setURI(devUri);
+                                CoapResponse devResponse = client.get();
+                                TradfriClient.this.eventsHandler.onCoapMessage(devResponse);
+                                TradfriClient.this.subscribeForCoapMessages(devUri);
+                                devices.add(array.getInt(i));
+
+                            }
+                        }
+
+
+                    }catch (JSONException e) {
+                        logger.warning(e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                }
+
+                @Override
+                public void onError() {
+                    logger.warning("problem with observe");
+                }
+            };
+            CoapObserveRelation relation = client.observe(handler);
+
+            watching.add(relation);
+
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            logger.warning(e.getMessage());
         }
     }
 

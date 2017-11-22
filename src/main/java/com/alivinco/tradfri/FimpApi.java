@@ -71,7 +71,10 @@ public class FimpApi {
 
     public void reportColorChange(int id , int red,int green,int blue ) {
         JSONObject value = new JSONObject();
-
+        if (!this.deviceDb.updateColorState(id,red,green,blue)){
+            logger.fine("Color value is not changed , skipp.");
+            return ;
+        }
         try {
             value.put("red", red);
             value.put("green", green);

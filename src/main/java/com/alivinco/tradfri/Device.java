@@ -13,6 +13,9 @@ public class Device {
     public String swVersion;
     public String hwVersion;
     public int dimLevel;
+    public int red;
+    public int green;
+    public int blue;
     public boolean lightState;
 
 }

@@ -63,6 +63,22 @@ public class DeviceDb {
         return false;
     }
 
+    // returns true if value was updated
+    public boolean updateColorState(int instanceId,int red,int green, int blue){
+        Device dev = deviceDb.get(instanceId);
+        if (dev != null) {
+            if (dev.red != red && dev.green != green && dev.blue != blue){
+                dev.red = red;
+                dev.green = green;
+                dev.blue = blue;
+                return true;
+            }
+        }else {
+            logger.fine("Device doesn't exist . Use upsert device first");
+        }
+        return false;
+    }
+
     public Device getDeviceById(int instanceId) {
         return deviceDb.get(instanceId);
     }
