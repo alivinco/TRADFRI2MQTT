@@ -4,7 +4,7 @@
 
   <groupId>com.alivinco.tradfri</groupId>
   <artifactId>ikea-ad</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.4</version>
   <packaging>jar</packaging>
 
   <name>ikea-ad</name>

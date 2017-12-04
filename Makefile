@@ -1,4 +1,4 @@
-version="0.1.2"
+version="0.1.4"
 working_dir=$(shell pwd)
 
 configure:

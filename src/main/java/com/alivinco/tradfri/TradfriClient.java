@@ -131,12 +131,13 @@ public class TradfriClient extends GwDiscovery {
 
     @Override
     void onGwDiscovered(String gwId, String gwIpAddress) {
-
+      logger.info("IKEA gateway is discovered");
       if (!connInfo.isConfigured) {
           connInfo.gwId = gwId;
           connInfo.gwIpAddress = gwIpAddress;
           saveConectionInfoToFile();
       }else if (connInfo.gwId == gwId) {
+          logger.info("IKEA gateway has changed it's IP address . Updating.");
           // in case if gateway changed ip address
           connInfo.gwIpAddress = gwIpAddress;
           saveConectionInfoToFile();
@@ -227,7 +228,7 @@ public class TradfriClient extends GwDiscovery {
                 }
             }
         };
-        executor.scheduleAtFixedRate(command, 10, 2, TimeUnit.HOURS);
+        executor.scheduleAtFixedRate(command, 10, 30, TimeUnit.MINUTES);
 
         discoverDevicesAndGroups();
         observeNetworkUpdates();
@@ -323,8 +324,21 @@ public class TradfriClient extends GwDiscovery {
             logger.info("Connecting to ip = "+connInfo.gwIpAddress);
             CoapClient client = new CoapClient(uri);
             client.setEndpoint(endPoint);
-
             CoapResponse response = client.get();
+            for(int i=0;i<4;i++) {
+                if (response == null) {
+                    logger.warning("First connection attempt failed , trying one more time after 5 seconds");
+                    Thread.sleep(5000);
+                    uri = new URI("coaps://" + connInfo.gwIpAddress + "//" + DEVICES);
+                    logger.info("Connecting to ip = "+connInfo.gwIpAddress);
+                    client = new CoapClient(uri);
+                    client.setEndpoint(endPoint);
+                    response = client.get();
+                } else {
+                    break;
+                }
+
+            }
             if (response == null) {
                 logger.warning("1 Connection to Gateway timed out, please check ip address or increase the ACK_TIMEOUT in the Californium.properties file");
                 connInfo.isConnected = false;
@@ -349,6 +363,8 @@ public class TradfriClient extends GwDiscovery {
             e.printStackTrace();
         } catch (JSONException e) {
             logger.warning(e.getMessage());
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -410,7 +426,6 @@ public class TradfriClient extends GwDiscovery {
 
                             }
                         }
-
 
                     }catch (JSONException e) {
                         logger.warning(e.getMessage());

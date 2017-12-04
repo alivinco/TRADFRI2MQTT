@@ -47,7 +47,7 @@ public class MsgRouter implements TradfriApiEvents {
             Device dev = deviceDb.getDeviceById(id);
             if (dev.type.equals("group"))
                 isDevice = false;
-            System.out.println(id);
+//            System.out.println(id);
 
             if (fimp.mtype.equals("cmd.binary.set")) {
                 if (isDevice)

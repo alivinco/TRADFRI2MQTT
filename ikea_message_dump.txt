@@ -86,7 +86,7 @@ room
 {"Observe":3558, "Content-Format":"application/json", "Max-Age":604800}
 
 
-RGB bulb , changing colors :
+-----------1RGB bulb , changing colors :
 {"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1506269492,"5750":2,"9003":65549,"9054":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":1,"5707":0,"5710":24694,"5709":24930,"5708":0,"5711":0,"5706":"f5faf6","9003":0}]}
 {"Observe":4201, "Content-Format":"application/json", "Max-Age":604800}
 {"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1506269492,"5750":2,"9003":65549,"9054":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":1,"5707":0,"5710":21299,"5709":42926,"5708":0,"5711":0,"5706":"dc4b31","9003":0}]}
@@ -95,3 +95,79 @@ RGB bulb , changing colors :
 {"Observe":4203, "Content-Format":"application/json", "Max-Age":604800}
 {"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1506269492,"5750":2,"9003":65549,"9054":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":1,"5707":0,"5710":8520,"5709":20316,"5708":0,"5711":0,"5706":"8f2686","9003":0}]}
 {"Observe":4204, "Content-Format":"application/json", "Max-Age":604800}
+
+-----------Node remove-------------------
+
+{"9001":"Rgb remote","9002":1506269363,"9020":1511456198,"9003":65548,"9054":0,"5750":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI remote control","2":"","3":"1.2.214","6":3,"9":87},"15009":[{"9003":0}]}
+{"Observe":4766, "Content-Format":"application/json", "Max-Age":604800}
+not bulb
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511424226,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":0,"5851":35,"5707":4137,"5708":65279,"5709":38011,"5706":"e78834","5710":24904,"9003":0}]}
+{"Observe":4767, "Content-Format":"application/json", "Max-Age":604800}
+{"9001":"Rgb remote","9002":1506269363,"9020":1511456198,"9003":65548,"9054":0,"5750":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI remote control","2":"","3":"1.2.214","6":3,"9":74},"15009":[{"9003":0}]}
+{"Observe":4768, "Content-Format":"application/json", "Max-Age":604800}
+not bulb
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511424226,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":35,"5707":4137,"5708":65279,"5709":38011,"5706":"e78834","5710":24904,"9003":0}]}
+{"Observe":4769, "Content-Format":"application/json", "Max-Age":604800}
+
+-----------Node added--------------------
+
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+{"Observe":4786, "Content-Format":"application/json", "Max-Age":604800}
+Nov 23, 2017 9:30:28 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color X = 30015 Y = 26870
+Nov 23, 2017 9:30:28 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0
+{"9001":"Playground","9002":1506269368,"9003":184295,"5850":0,"5851":0,"9039":222297,"9018":{"15002":{"9003":[65548,65549]}}}
+{"Observe":4787, "Content-Format":"application/json", "Max-Age":604800}
+room
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+Nov 23, 2017 9:30:28 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+{"Observe":4788, "Content-Format":"application/json", "Max-Age":604800}
+INFO: Color X = 30015 Y = 26870
+Nov 23, 2017 9:30:28 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0
+Nov 23, 2017 9:30:28 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color X = 30015 Y = 26870
+Nov 23, 2017 9:30:28 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+{"Observe":4789, "Content-Format":"application/json", "Max-Age":604800}
+Nov 23, 2017 9:30:29 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+INFO: Color X = 30015 Y = 26870
+{"Observe":4791, "Content-Format":"application/json", "Max-Age":604800}
+Nov 23, 2017 9:30:29 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0
+Nov 23, 2017 9:30:29 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+INFO: Color X = 30015 Y = 26870
+{"Observe":4794, "Content-Format":"application/json", "Max-Age":604800}
+Nov 23, 2017 9:30:29 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0
+Nov 23, 2017 9:30:29 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color X = 30015 Y = 26870
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+Nov 23, 2017 9:30:29 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+{"Observe":4796, "Content-Format":"application/json", "Max-Age":604800}
+INFO: Color R = 254 G = 0 B = 0
+{"9001":"Rgb remote","9002":1506269363,"9020":1511469042,"9003":65548,"9054":0,"5750":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI remote control","2":"","3":"1.2.214","6":3,"9":74},"15009":[{"9003":0}]}
+{"Observe":4799, "Content-Format":"application/json", "Max-Age":604800}
+not bulb
+Nov 23, 2017 9:30:34 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+{"9001":"Rgb remote","9002":1506269363,"9020":1511469042,"9003":65548,"9054":0,"5750":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI remote control","2":"","3":"1.2.214","6":3,"9":74},"15009":[{"9003":0}]}
+INFO: Color X = 30015 Y = 26870
+Nov 23, 2017 9:30:34 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0
+{"Observe":4800, "Content-Format":"application/json", "Max-Age":604800}
+not bulb
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":1,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+{"Observe":4801, "Content-Format":"application/json", "Max-Age":604800}
+{"9001":"Rgb remote","9002":1506269363,"9020":1511469044,"9003":65548,"9054":0,"5750":0,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI remote control","2":"","3":"1.2.214","6":3,"9":74},"15009":[{"9003":0}]}
+{"Observe":4805, "Content-Format":"application/json", "Max-Age":604800}
+not bulb
+{"9001":"TRADFRI bulb E27 CWS opal 600lm","9002":1506269492,"9020":1511468973,"9003":65549,"9054":0,"5750":2,"9019":1,"3":{"0":"IKEA of Sweden","1":"TRADFRI bulb E27 CWS opal 600lm","2":"","3":"1.3.002","6":1},"3311":[{"5850":0,"5851":254,"5707":5427,"5708":42596,"5709":30015,"5706":"f1e0b5","5710":26870,"9003":0}]}
+{"Observe":4806, "Content-Format":"application/json", "Max-Age":604800}
+Nov 23, 2017 9:31:52 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color X = 30015 Y = 26870
+Nov 23, 2017 9:31:52 PM com.alivinco.tradfri.MsgRouter onCoapMessage
+INFO: Color R = 254 G = 0 B = 0

@@ -1,5 +1,5 @@
 Package: ikea-ad
-Version: 0.1.2
+Version: 0.1.4
 Replaces: ikea-ad
 Architecture: all
 Maintainer: Aleksandrs Livincovs <aleksandrs.livincovs@gmail.com>
