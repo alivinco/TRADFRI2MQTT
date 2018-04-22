@@ -2,6 +2,8 @@ package com.alivinco.tradfri;
 
 import com.alivinco.fimp.FimpAddress;
 import com.alivinco.fimp.FimpMessage;
+import com.alivinco.tradfri.types.ColorMap;
+import com.alivinco.tradfri.types.RGB;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
@@ -131,9 +133,13 @@ public class MsgRouter implements TradfriApiEvents {
 
                 if (light.has(COLOR_X)&&light.has(COLOR_Y)) {
                     logger.info("Color X = "+light.getInt(COLOR_X)+" Y = "+light.getInt(COLOR_Y));
-                    ColorConverter color = ColorConverter.fromCie(light.getInt(COLOR_X),light.getInt(COLOR_Y),light.getInt(DIMMER));
-                    logger.info("Color R = "+color.rgbR+" G = "+color.rgbG+" B = "+color.rgbB);
-                    fimpApi.reportColorChange(json.getInt(INSTANCE_ID),color.rgbR,color.rgbG,color.rgbB);
+
+//                    ColorConverter color = ColorConverter.fromCie(light.getInt(COLOR_X),light.getInt(COLOR_Y),light.getInt(DIMMER));
+                    ColorMap cmap = new ColorMap();
+                    RGB rgb =  cmap.XYtoRGB(21109 , 21738);
+
+                    logger.info("Color R = "+rgb.r+" G = "+rgb.g+" B = "+rgb.b);
+                    fimpApi.reportColorChange(json.getInt(INSTANCE_ID),rgb.r,rgb.g,rgb.b);
                 } else { // just fyi for the user. maybe add further handling later
                     System.out.println("Bulb '" + json.getString(NAME) + "' doesn't support color");
                 }

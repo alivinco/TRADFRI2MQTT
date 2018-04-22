@@ -174,6 +174,7 @@ public class TradfriClient extends GwDiscovery {
             logger.warning(e.getMessage());
             e.printStackTrace();
         }
+
     }
 
     /**

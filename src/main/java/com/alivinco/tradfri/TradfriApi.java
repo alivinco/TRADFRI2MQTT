@@ -1,6 +1,8 @@
 package com.alivinco.tradfri;
 
+import com.alivinco.tradfri.types.ColorMap;
 import com.alivinco.tradfri.types.HSBType;
+import com.alivinco.tradfri.types.XY;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,11 +71,13 @@ public class TradfriApi {
         array.put(settings);
         json.put(LIGHT, array);
 
-        HSBType hsb = HSBType.fromRGB(red,green,blue);
-        ColorConverter color = ColorConverter.fromHSBType(hsb);
-        logger.info("Setting color x = " + color.xyX.toString()+" y = "+color.xyY.toString()+" \n");
-        settings.put(COLOR_X,color.xyX);
-        settings.put(COLOR_Y,color.xyY);
+//        HSBType hsb = HSBType.fromRGB(red,green,blue);
+//        ColorConverter color = ColorConverter.fromHSBType(hsb);
+        ColorMap cmap = new ColorMap();
+        XY xy = cmap.RGBtoXY(red,green,blue);
+        logger.info("Setting color x = " + xy.x+" y = "+xy.y+" \n");
+        settings.put(COLOR_X,xy.x);
+        settings.put(COLOR_Y,xy.y);
         this.client.sendToDevice(id, json);
     }
 }
